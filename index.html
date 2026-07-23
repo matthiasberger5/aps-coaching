@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#13261d">
+  <title>APS 2.0.1 · Coaching System</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="app-header">
+  <a class="brand" href="#entry" aria-label="APS Startseite">
+    <img src="assets/aps-logo.png" alt="APS">
+    <span><strong>APS 2.0.1</strong><small>Adaptive Player System</small></span>
+  </a>
+  <nav class="main-nav" aria-label="Hauptnavigation">
+    <button class="nav-btn active" data-view="entry">Runde</button>
+    <button class="nav-btn" data-view="analysis">Analyse</button>
+    <button class="nav-btn" data-view="training">Training</button>
+    <button class="nav-btn" data-view="profile">Profil</button>
+  </nav>
+  <button id="menuBtn" class="icon-btn mobile-only" aria-label="Navigation öffnen">☰</button>
+</header>
+
+<main class="app-shell">
+<section id="entry" class="view active">
+  <div class="page-intro">
+    <div><span class="kicker">Datenerfassung</span><h1>Eine Maske. Jeder Schlag. Klare Ursachen.</h1><p>APS erfasst nur Daten, die Schwächen erkennen und konkrete Trainingsschwerpunkte ableiten.</p></div>
+    <div class="toolbar">
+      <button id="sampleBtn" class="btn ghost">Beispieldaten</button>
+      <button id="newRoundBtn" class="btn ghost">Neue Runde</button>
+      <button id="analyseBtn" class="btn primary">Speichern & analysieren</button>
+    </div>
+  </div>
+
+  <div class="card round-meta">
+    <div class="card-title"><h2>Spieler & Runde</h2><span id="saveState" class="status-pill">Lokal gespeichert</span></div>
+    <div class="form-grid cols-5">
+      <label>Spielername<input id="playerName" autocomplete="name" placeholder="Name"></label>
+      <label>Handicap<input id="handicap" inputmode="decimal" type="number" step="0.1" placeholder="z. B. 18,4"></label>
+      <label>Datum<input id="roundDate" type="date"></label>
+      <label>Platz<input id="course" placeholder="Golfclub / Platz"></label>
+      <label>Rundennotiz<input id="roundNote" placeholder="Wetter, Fokus, Bedingungen"></label>
+    </div>
+  </div>
+
+  <div class="round-layout">
+    <aside class="card hole-panel">
+      <div class="card-title"><h2>Bahnen</h2><button id="addHoleBtn" class="mini-btn">+ Bahn</button></div>
+      <div id="holeList" class="hole-list"></div>
+      <div class="round-totals" id="roundTotals"></div>
+    </aside>
+
+    <div class="card capture-panel">
+      <div class="capture-head">
+        <div><span class="kicker" id="holeKicker">Bahn 1</span><h2 id="holeTitle">Schläge erfassen</h2></div>
+        <div class="hole-fields">
+          <label>Par<select id="holePar"><option>3</option><option selected>4</option><option>5</option></select></label>
+          <label>Score<input id="holeScore" type="number" min="1" max="20" placeholder="–"></label>
+        </div>
+      </div>
+      <div id="shotList" class="shot-list"></div>
+      <button id="addShotBtn" class="btn add">+ Schlag hinzufügen</button>
+    </div>
+  </div>
+</section>
+
+<section id="analysis" class="view">
+  <div class="page-intro"><div><span class="kicker">Coach Analyse</span><h1 id="analysisHeadline">Noch keine Analyse vorhanden</h1><p id="analysisSubline">Nach der Erfassung priorisiert APS Schwächen nach Häufigkeit und Score-Auswirkung.</p></div><div class="toolbar"><button class="btn ghost print-btn">Drucken / PDF</button></div></div>
+  <div id="summaryHero" class="coach-hero"></div>
+  <div class="metric-grid" id="metricGrid"></div>
+  <div class="content-grid two">
+    <article class="card"><div class="card-title"><h2>Trainingsprioritäten</h2><span class="hint">Was zuerst trainiert wird</span></div><div id="priorityList"></div></article>
+    <article class="card"><div class="card-title"><h2>Sofortige Spielstrategie</h2><span class="hint">Was sofort Schläge spart</span></div><div id="strategyList"></div></article>
+  </div>
+  <article class="card"><div class="card-title"><h2>Die sechs APS-Säulen</h2><span class="hint">Schwäche → Ursache → Maßnahme</span></div><div id="pillarGrid" class="pillar-grid"></div></article>
+  <div class="content-grid two">
+    <article class="card"><h2>Schlägeranalyse</h2><div id="clubTable"></div></article>
+    <article class="card"><h2>Fehlermuster</h2><div id="patternList"></div></article>
+  </div>
+</section>
+
+<section id="training" class="view">
+  <div class="page-intro"><div><span class="kicker">Trainingssteuerung</span><h1>Aus Analyse wird Training</h1><p>Die wichtigsten Ursachen werden in Übungen, Zeitblöcke und messbare Ziele übersetzt.</p></div><div class="toolbar"><button class="btn ghost print-btn">Plan drucken</button></div></div>
+  <div id="trainingPlan" class="training-plan"></div>
+</section>
+
+<section id="profile" class="view">
+  <div class="page-intro"><div><span class="kicker">Spielerprofil</span><h1 id="profileName">APS Player Profile</h1><p id="profileMeta">Entwicklung über die gespeicherten Rundendaten.</p></div><div class="toolbar"><button id="exportBtn" class="btn ghost">Daten exportieren</button><label class="btn ghost file-btn">Importieren<input id="importInput" type="file" accept="application/json"></label><button class="btn ghost print-btn">Profil drucken</button></div></div>
+  <div id="profileMetrics" class="metric-grid"></div>
+  <div class="content-grid two"><article class="card"><h2>Das funktioniert bereits</h2><div id="strengthList"></div></article><article class="card"><h2>Hier verliert der Spieler Schläge</h2><div id="weaknessList"></div></article></div>
+  <article class="card"><h2>Rundendaten</h2><div id="roundArchive"></div></article>
+</section>
+</main>
+
+<template id="shotTemplate">
+  <article class="shot-card">
+    <div class="shot-top"><span class="shot-number"></span><button class="delete-shot" aria-label="Schlag löschen">×</button></div>
+    <div class="form-grid shot-grid">
+      <label>Schlagart<select data-field="type"></select></label>
+      <label class="subtype-field hidden">Unterart<select data-field="subtype"></select></label>
+      <label>Schläger<select data-field="club"></select></label>
+      <label class="contact-field">Ballkontakt<select data-field="contact"></select></label>
+      <label class="putt-distance-field hidden">Ausgangsdistanz<select data-field="puttStart"></select></label>
+      <label>Richtung<select data-field="direction"></select></label>
+      <label><span class="distance-label">Distanz</span><select data-field="distance"></select></label>
+      <label class="lie-field">Neue Lage<select data-field="lie"></select></label>
+      <label class="rest-field hidden">Restdistanz<select data-field="rest"></select></label>
+      <label>Strafschläge<select data-field="penalties"></select></label>
+      <label class="penalty-reason hidden">Ursache<select data-field="penaltyReason"></select></label>
+    </div>
+  </article>
+</template>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="js/app.bundle.js" defer></script>
+</body>
+</html>
