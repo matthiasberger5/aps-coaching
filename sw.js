@@ -1,5 +1,5 @@
 const CACHE='aps-2-0-1-v2';
-const FILES=['./','./index.html','./css/app.css','./js/app.bundle.js','./assets/aps-logo.png','./manifest.webmanifest'];
+const FILES=['./','./index.html','./css/app.css','./js/app.js','./assets/aps-logo.png','./manifest.webmanifest'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)))});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]))});
 self.addEventListener('fetch',event=>{

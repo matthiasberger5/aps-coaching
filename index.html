@@ -4,15 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#13261d">
-  <title>APS 2.0.1 · Coaching System</title>
+  <title>APS 3.0 · Coaching System</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
 <header class="app-header">
+  <div class="header-inner">
   <a class="brand" href="#entry" aria-label="APS Startseite">
     <img src="assets/aps-logo.png" alt="APS">
-    <span><strong>APS 2.0.1</strong><small>Adaptive Player System</small></span>
+    <span><strong>APS 3.0</strong><small>Adaptive Player System</small></span>
   </a>
   <nav class="main-nav" aria-label="Hauptnavigation">
     <button class="nav-btn active" data-view="entry">Runde</button>
@@ -21,12 +22,13 @@
     <button class="nav-btn" data-view="profile">Profil</button>
   </nav>
   <button id="menuBtn" class="icon-btn mobile-only" aria-label="Navigation öffnen">☰</button>
+  </div>
 </header>
 
 <main class="app-shell">
 <section id="entry" class="view active">
-  <div class="page-intro">
-    <div><span class="kicker">Datenerfassung</span><h1>Eine Maske. Jeder Schlag. Klare Ursachen.</h1><p>APS erfasst nur Daten, die Schwächen erkennen und konkrete Trainingsschwerpunkte ableiten.</p></div>
+  <div class="view-bar">
+    <div class="view-label"><span class="kicker">Rundenerfassung</span></div>
     <div class="toolbar">
       <button id="sampleBtn" class="btn ghost">Beispieldaten</button>
       <button id="newRoundBtn" class="btn ghost">Neue Runde</button>
@@ -67,7 +69,7 @@
 </section>
 
 <section id="analysis" class="view">
-  <div class="page-intro"><div><span class="kicker">Coach Analyse</span><h1 id="analysisHeadline">Noch keine Analyse vorhanden</h1><p id="analysisSubline">Nach der Erfassung priorisiert APS Schwächen nach Häufigkeit und Score-Auswirkung.</p></div><div class="toolbar"><button class="btn ghost print-btn">Drucken / PDF</button></div></div>
+  <div class="view-bar"><div class="view-label"><span class="kicker">Coach Analyse</span><span id="analysisSubline" class="view-meta">Noch keine Auswertung vorhanden</span><span id="analysisHeadline" class="sr-only">Noch keine Analyse vorhanden</span></div><div class="toolbar"><button class="btn ghost print-btn">Drucken / PDF</button></div></div>
   <div id="summaryHero" class="coach-hero"></div>
   <div class="metric-grid" id="metricGrid"></div>
   <div class="content-grid two">
@@ -82,12 +84,12 @@
 </section>
 
 <section id="training" class="view">
-  <div class="page-intro"><div><span class="kicker">Trainingssteuerung</span><h1>Aus Analyse wird Training</h1><p>Die wichtigsten Ursachen werden in Übungen, Zeitblöcke und messbare Ziele übersetzt.</p></div><div class="toolbar"><button class="btn ghost print-btn">Plan drucken</button></div></div>
+  <div class="view-bar"><div class="view-label"><span class="kicker">Trainingsplan</span></div><div class="toolbar"><button class="btn ghost print-btn">Plan drucken</button></div></div>
   <div id="trainingPlan" class="training-plan"></div>
 </section>
 
 <section id="profile" class="view">
-  <div class="page-intro"><div><span class="kicker">Spielerprofil</span><h1 id="profileName">APS Player Profile</h1><p id="profileMeta">Entwicklung über die gespeicherten Rundendaten.</p></div><div class="toolbar"><button id="exportBtn" class="btn ghost">Daten exportieren</button><label class="btn ghost file-btn">Importieren<input id="importInput" type="file" accept="application/json"></label><button class="btn ghost print-btn">Profil drucken</button></div></div>
+  <div class="view-bar"><div class="view-label"><span class="kicker" id="profileName">Spielerprofil</span><span id="profileMeta" class="view-meta">Noch keine Spielerdaten.</span></div><div class="toolbar"><button id="exportBtn" class="btn ghost">Daten exportieren</button><label class="btn ghost file-btn">Importieren<input id="importInput" type="file" accept="application/json"></label><button class="btn ghost print-btn">Profil drucken</button></div></div>
   <div id="profileMetrics" class="metric-grid"></div>
   <div class="content-grid two"><article class="card"><h2>Das funktioniert bereits</h2><div id="strengthList"></div></article><article class="card"><h2>Hier verliert der Spieler Schläge</h2><div id="weaknessList"></div></article></div>
   <article class="card"><h2>Rundendaten</h2><div id="roundArchive"></div></article>
@@ -114,6 +116,6 @@
 </template>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="js/app.bundle.js" defer></script>
+<script src="js/app.js" defer></script>
 </body>
 </html>
