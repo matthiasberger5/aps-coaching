@@ -69,23 +69,61 @@
 </section>
 
 <section id="analysis" class="view">
-  <div class="view-bar"><div class="view-label"><span class="kicker">Coach Analyse</span><span id="analysisSubline" class="view-meta">Noch keine Auswertung vorhanden</span><span id="analysisHeadline" class="sr-only">Noch keine Analyse vorhanden</span></div><div class="toolbar"><button class="btn ghost print-btn">Drucken / PDF</button></div></div>
+  <header class="print-only print-report-header" aria-hidden="true">
+    <div class="print-report-brand">
+      <img src="assets/aps-logo.png" alt="">
+      <div><span>APS 3.0 · Adaptive Player System</span><h1>Analysebericht</h1></div>
+      <div class="print-report-type">COACHING REPORT</div>
+    </div>
+    <div id="analysisPrintMeta" class="print-report-meta"></div>
+  </header>
+  <div class="view-bar"><div class="view-label"><span class="kicker">Coach Analyse</span><span id="analysisSubline" class="view-meta">Noch keine Auswertung vorhanden</span><span id="analysisHeadline" class="sr-only">Noch keine Analyse vorhanden</span></div><div class="toolbar"><button class="btn ghost print-btn" data-print-mode="analysis">Analyse drucken</button><button class="btn primary customer-report-btn" data-print-mode="customer">Kundenbericht + Angebote</button></div></div>
   <div id="summaryHero" class="coach-hero"></div>
   <div class="metric-grid" id="metricGrid"></div>
-  <div class="content-grid two">
+  <div class="content-grid two analysis-priority-grid">
     <article class="card"><div class="card-title"><h2>Trainingsprioritäten</h2><span class="hint">Was zuerst trainiert wird</span></div><div id="priorityList"></div></article>
     <article class="card"><div class="card-title"><h2>Sofortige Spielstrategie</h2><span class="hint">Was sofort Schläge spart</span></div><div id="strategyList"></div></article>
   </div>
-  <article class="card"><div class="card-title"><h2>Die sechs APS-Säulen</h2><span class="hint">Schwäche → Ursache → Maßnahme</span></div><div id="pillarGrid" class="pillar-grid"></div></article>
-  <div class="content-grid two">
+  <article class="card pillar-section analysis-pillar-page"><div class="card-title"><h2>APS-Leistungsindex der sechs Säulen</h2><span class="hint">0 = kritisch · 100 = stabil</span></div><div class="index-explainer"><strong>So lesen Sie die Werte:</strong> Der Index ist keine Trefferquote. Er verbindet Häufigkeit, Schwere und Auswirkung der Fehler. Die separate Fehlerquote zeigt, wie viele Beobachtungen auffällig waren.</div><div class="index-legend" aria-label="Bewertungsskala"><span><strong>0–24</strong> Kritisch</span><span><strong>25–49</strong> Trainingsbedarf</span><span><strong>50–69</strong> Ausbaufähig</span><span><strong>70–84</strong> Stabil</span><span><strong>85–100</strong> Stärke</span></div><div id="pillarGrid" class="pillar-grid"></div></article>
+  <div class="content-grid two analysis-detail-grid">
     <article class="card"><h2>Schlägeranalyse</h2><div id="clubTable"></div></article>
     <article class="card"><h2>Fehlermuster</h2><div id="patternList"></div></article>
   </div>
 </section>
 
 <section id="training" class="view">
-  <div class="view-bar"><div class="view-label"><span class="kicker">Trainingsplan</span></div><div class="toolbar"><button class="btn ghost print-btn">Plan drucken</button></div></div>
+  <header class="print-only print-report-header" aria-hidden="true">
+    <div class="print-report-brand">
+      <img src="assets/aps-logo.png" alt="">
+      <div><span>APS 3.0 · Adaptive Player System</span><h1>Individueller Trainingsplan</h1></div>
+      <div class="print-report-type">TRAININGSPLAN</div>
+    </div>
+    <div id="trainingPrintMeta" class="print-report-meta"></div>
+  </header>
+  <div class="view-bar"><div class="view-label"><span class="kicker">Trainingsplan</span></div><div class="toolbar"><button class="btn ghost print-btn" data-print-mode="training">Plan + Angebote drucken</button><button class="btn primary customer-report-btn" data-print-mode="customer">Kundenbericht + Angebote</button></div></div>
+  <div id="trainingPrintSummary" class="print-only training-print-summary"></div>
   <div id="trainingPlan" class="training-plan"></div>
+
+  <section id="continuationOffers" class="customer-offers" aria-labelledby="offersTitle">
+    <header class="print-only print-report-header offer-print-header" aria-hidden="true">
+      <div class="print-report-brand">
+        <img src="assets/aps-logo.png" alt="">
+        <div><span>APS 3.0 · Adaptive Player System</span><h1>Ihr nächster Entwicklungsschritt</h1></div>
+        <div class="print-report-type">PROGRAMMOPTIONEN</div>
+      </div>
+      <div id="offerPrintMeta" class="print-report-meta offer-print-meta"></div>
+    </header>
+    <article class="card offer-content">
+      <div class="offer-intro">
+        <div><span class="kicker">Weiterführendes Coaching</span><h2 id="offersTitle">Analyse nutzen. Entwicklung fortsetzen.</h2></div>
+        <div class="credit-badge"><span>Bereits angerechnet</span><strong>99 €</strong></div>
+      </div>
+      <p id="offerContext" class="offer-context"></p>
+      <div class="credit-callout"><strong>Ihre Erstanalyse ist bereits bezahlt.</strong> Bei der Buchung eines APS-Programms werden die gezahlten 99 € vollständig angerechnet. Sie zahlen nur den ausgewiesenen Restbetrag.</div>
+      <div id="offerGrid" class="offer-grid"></div>
+      <footer class="offer-footer"><strong>Welcher Weg passt zu Ihren Zielen?</strong><span>Persönliche Beratung: 0171 9045523 · info@aps.golf</span></footer>
+    </article>
+  </section>
 </section>
 
 <section id="profile" class="view">
