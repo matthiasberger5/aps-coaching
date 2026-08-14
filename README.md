@@ -65,3 +65,7 @@ Der Dateiname wird automatisch aus Berichtstyp, Spielername und Rundendatum gebi
 Über **Kundenbericht + Angebote** wird ein vollständiger Kundenbericht ausgegeben: Analyse, Trainingsplan und eine separate Seite mit APS PLAY, APS ADAPT und APS PERFORM. Die bereits bezahlte Erstanalyse von 99 EUR wird transparent vom jeweiligen Programmpreis abgezogen. QR-Codes und klickbare Links führen direkt zu den Programmseiten.
 
 Die Angebotsdaten können zentral in `js/app.js` über `ANALYSIS_CREDIT` und `APS_OFFERS` gepflegt werden.
+
+## Automatischer Score
+
+Der Bahnscore wird automatisch aus den erfassten Schlägen berechnet. Jeder erfasste Schlag zählt einen Schlag; eingetragene Strafschläge werden zusätzlich addiert. Das Score-Feld ist deshalb nur noch eine Anzeige und muss nicht manuell gepflegt werden. Die Druckausgabe verwendet DIN A4 Hochformat.

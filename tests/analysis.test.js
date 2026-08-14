@@ -8,8 +8,8 @@ const appPath=path.join(__dirname,'..','js','app.js');
 const source=fs.readFileSync(appPath,'utf8').split("const KEY='aps-3.0-state'")[0];
 const context={console,globalThis:{crypto:{randomUUID:()=>Math.random().toString(36).slice(2)}}};
 vm.createContext(context);
-vm.runInContext(source+';globalThis.testApi={initialState,sampleState,analyse,trainingFrom,performanceBand,uid,APS_OFFERS,ANALYSIS_CREDIT};',context);
-const {initialState,sampleState,analyse,trainingFrom,performanceBand,uid,APS_OFFERS,ANALYSIS_CREDIT}=context.globalThis.testApi;
+vm.runInContext(source+';globalThis.testApi={initialState,sampleState,analyse,trainingFrom,performanceBand,uid,APS_OFFERS,ANALYSIS_CREDIT,calculatedHoleScore,recordedStrokeCount,penaltyStrokeCount};',context);
+const {initialState,sampleState,analyse,trainingFrom,performanceBand,uid,APS_OFFERS,ANALYSIS_CREDIT,calculatedHoleScore,recordedStrokeCount,penaltyStrokeCount}=context.globalThis.testApi;
 
 const shot=(type,extra={})=>({id:uid(),type,subtype:'',club:type==='Putt'?'Putter':'Eisen 7',contact:'',direction:'',distance:'',lie:'',puttStart:'',rest:'',penalties:'0',penaltyReason:'',...extra});
 const stateWithShots=shots=>({version:'3.0',player:{name:'Test',handicap:'',date:'2026-07-27',course:'',note:''},holes:[{id:uid(),number:1,par:4,score:'',shots}],activeHole:0,lastAnalysis:null,archive:[]});
@@ -24,10 +24,10 @@ const stateWithShots=shots=>({version:'3.0',player:{name:'Test',handicap:'',date
   const result=analyse(sampleState());
   assert.deepStrictEqual(Array.from(result.priorities,p=>p.name),[
     'Abschlag – Ball im Spiel halten',
-    'Putten – Distanzkontrolle',
-    'Langes Spiel – Treffmoment & Carry'
+    'Langes Spiel – Treffmoment & Carry',
+    'Putten – Distanzkontrolle'
   ]);
-  assert.deepStrictEqual(Array.from(trainingFrom(result),x=>x.minutes),[35,30,25]);
+  assert.deepStrictEqual(Array.from(trainingFrom(result),x=>x.minutes),[30,30,30]);
 }
 
 {
@@ -60,6 +60,46 @@ const stateWithShots=shots=>({version:'3.0',player:{name:'Test',handicap:'',date
 }
 
 
+// Referenzprofile: unterschiedliche Spielprobleme müssen zu unterschiedlichen Prioritäten führen.
+{
+  const result=analyse(stateWithShots([
+    ...Array.from({length:6},()=>shot('Abschlag',{contact:'Solide',direction:'Stark rechts',distance:'Passend',lie:'Rough'})),
+    ...Array.from({length:4},()=>shot('Kurzspiel',{subtype:'Chip',contact:'Solide',direction:'Zielbereich',distance:'Passend',lie:'Grün',rest:'Bis 0,5 m'})),
+    ...Array.from({length:6},()=>shot('Putt',{puttStart:'2–5 m',direction:'Startlinie passend',distance:'Passend',rest:'Bis 0,5 m'}))
+  ]));
+  assert.strictEqual(result.priorities[0].name,'Abschlag – Richtungskontrolle');
+}
+{
+  const result=analyse(stateWithShots([
+    ...Array.from({length:6},()=>shot('Transportschlag',{contact:'Dünn',direction:'Zielbereich',distance:'Zu kurz',lie:'Vorgrün'})),
+    ...Array.from({length:4},()=>shot('Kurzspiel',{subtype:'Chip',contact:'Solide',direction:'Zielbereich',distance:'Passend',lie:'Grün',rest:'Bis 0,5 m'})),
+    ...Array.from({length:6},()=>shot('Putt',{puttStart:'2–5 m',direction:'Startlinie passend',distance:'Passend',rest:'Bis 0,5 m'}))
+  ]));
+  assert.ok(result.priorities[0].name.startsWith('Langes Spiel –'));
+}
+{
+  const result=analyse(stateWithShots([
+    ...Array.from({length:6},()=>shot('Kurzspiel',{subtype:'Chip',contact:'Dünn',direction:'Zielbereich',distance:'Passend',lie:'Grün',rest:'1–2 m'})),
+    ...Array.from({length:6},()=>shot('Putt',{puttStart:'2–5 m',direction:'Startlinie passend',distance:'Passend',rest:'Bis 0,5 m'}))
+  ]));
+  assert.strictEqual(result.priorities[0].name,'Kurzspiel – Ballkontakt');
+}
+{
+  const result=analyse(stateWithShots([
+    ...Array.from({length:6},()=>shot('Putt',{puttStart:'Bis 1 m',direction:'Links vorbei',distance:'Passend',rest:'Bis 0,5 m'})),
+    ...Array.from({length:4},()=>shot('Kurzspiel',{subtype:'Chip',contact:'Solide',direction:'Zielbereich',distance:'Passend',lie:'Grün',rest:'Bis 0,5 m'}))
+  ]));
+  assert.strictEqual(result.priorities[0].name,'Putten – kurze Putts');
+}
+{
+  const result=analyse(stateWithShots([
+    ...Array.from({length:6},()=>shot('Kurzspiel',{subtype:'Pitch',contact:'Solide',direction:'Zielbereich',distance:'Zu kurz',lie:'Grün',rest:'2–5 m'})),
+    ...Array.from({length:6},()=>shot('Putt',{puttStart:'2–5 m',direction:'Startlinie passend',distance:'Passend',rest:'Bis 0,5 m'}))
+  ]));
+  assert.strictEqual(result.priorities[0].name,'Kurzspiel – Längenkontrolle');
+}
+
+
 {
   const result=analyse(initialState());
   assert.ok(result.pillars.every(p=>p.score===null),'Fehlende Säulendaten müssen als nicht bewertbar statt als 0 angezeigt werden.');
@@ -83,4 +123,21 @@ const stateWithShots=shots=>({version:'3.0',player:{name:'Test',handicap:'',date
   assert.deepStrictEqual(Array.from(APS_OFFERS,offer=>offer.price-ANALYSIS_CREDIT),[250,500,1200],'Die Restbeträge der APS-Programme müssen korrekt berechnet werden.');
 }
 
-console.log('Alle Analyse- und Angebots-Tests bestanden.');
+
+{
+  const hole={id:uid(),number:1,par:4,score:'',shots:[
+    shot('Abschlag',{club:'Driver',contact:'Solide',direction:'Zielbereich',distance:'Passend',lie:'Fairway'}),
+    shot('Transportschlag',{club:'Eisen 7',contact:'Solide',direction:'Zielbereich',distance:'Passend',lie:'Grün'}),
+    shot('Putt',{club:'Putter',puttStart:'5–10 m',direction:'Startlinie passend',distance:'Passend',rest:'Bis 0,5 m'}),
+    shot('Putt',{club:'Putter',puttStart:'Bis 1 m',direction:'Startlinie passend',distance:'Passend',rest:'Eingelocht'})
+  ]};
+  assert.strictEqual(recordedStrokeCount(hole),4,'Jeder erfasste Schlag muss genau einmal zum Score zählen.');
+  assert.strictEqual(penaltyStrokeCount(hole),0);
+  assert.strictEqual(calculatedHoleScore(hole),4,'Vier erfasste Schläge müssen Score 4 ergeben.');
+  hole.shots[0].penalties='1';
+  hole.shots[0].penaltyReason='Aus';
+  assert.strictEqual(penaltyStrokeCount(hole),1,'Ein Strafschlag muss separat gezählt werden.');
+  assert.strictEqual(calculatedHoleScore(hole),5,'Vier Schläge plus ein Strafschlag müssen Score 5 ergeben.');
+}
+
+console.log('Alle Analyse-, Angebots- und Score-Tests bestanden.');
