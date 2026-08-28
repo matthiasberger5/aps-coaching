@@ -66,6 +66,8 @@ Der Dateiname wird automatisch aus Berichtstyp, Spielername und Rundendatum gebi
 
 Die Angebotsdaten können zentral in `js/app.js` über `ANALYSIS_CREDIT` und `APS_OFFERS` gepflegt werden.
 
-## Automatischer Score
+## Preisupdate Angebote
 
-Der Bahnscore wird automatisch aus den erfassten Schlägen berechnet. Jeder erfasste Schlag zählt einen Schlag; eingetragene Strafschläge werden zusätzlich addiert. Das Score-Feld ist deshalb nur noch eine Anzeige und muss nicht manuell gepflegt werden. Die Druckausgabe verwendet DIN A4 Hochformat.
+- APS PLAY: 499 € − 99 € Erstanalyse = 400 € Restbetrag
+- APS ADAPT: 799 € − 99 € Erstanalyse = 700 € Restbetrag
+- APS PERFORM: 1.490 € − 99 € Erstanalyse = 1.391 € Restbetrag

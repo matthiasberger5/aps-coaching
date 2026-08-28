@@ -1,5 +1,4 @@
-// APS cache revision v4
-const CACHE='aps-3-0-auto-score-portrait-v6-analysis-v3';
+const CACHE='aps-3-0-customer-report-v5-prices';
 const FILES=['./','./index.html','./css/app.css','./js/app.js','./assets/aps-logo.png','./assets/qr-aps-play.png','./assets/qr-aps-adapt.png','./assets/qr-aps-perform.png','./manifest.webmanifest'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)))});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()]))});

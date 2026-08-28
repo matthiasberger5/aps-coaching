@@ -59,7 +59,7 @@
         <div><span class="kicker" id="holeKicker">Bahn 1</span><h2 id="holeTitle">Schläge erfassen</h2></div>
         <div class="hole-fields">
           <label>Par<select id="holePar"><option>3</option><option selected>4</option><option>5</option></select></label>
-          <label>Score automatisch<input id="holeScore" type="number" min="1" max="30" placeholder="–" readonly aria-readonly="true"></label>
+          <label>Score<input id="holeScore" type="number" min="1" max="20" placeholder="–"></label>
         </div>
       </div>
       <div id="shotList" class="shot-list"></div>
@@ -127,10 +127,10 @@
 </section>
 
 <section id="profile" class="view">
-  <div class="view-bar"><div class="view-label"><span class="kicker" id="profileName">Spielerprofil</span><span id="profileMeta" class="view-meta">Noch keine Spielerdaten.</span></div><div class="toolbar"><button id="exportBtn" class="btn ghost">Daten exportieren</button><button id="emailExportBtn" class="btn primary">Per Mail exportieren</button><label class="btn ghost file-btn">Importieren<input id="importInput" type="file" accept="application/json"></label><button class="btn ghost print-btn">Profil drucken</button></div></div>
+  <div class="view-bar"><div class="view-label"><span class="kicker" id="profileName">Spielerprofil</span><span id="profileMeta" class="view-meta">Noch keine Spielerdaten.</span></div><div class="toolbar"><button id="exportBtn" class="btn ghost">Daten exportieren</button><label class="btn ghost file-btn">Importieren<input id="importInput" type="file" accept="application/json"></label><button class="btn ghost print-btn">Profil drucken</button></div></div>
   <div id="profileMetrics" class="metric-grid"></div>
   <div class="content-grid two"><article class="card"><h2>Das funktioniert bereits</h2><div id="strengthList"></div></article><article class="card"><h2>Hier verliert der Spieler Schläge</h2><div id="weaknessList"></div></article></div>
-  <article class="card"><div class="card-title"><h2>Gespeicherte Analysen & Runden</h2><span class="hint">Laden, weiterbearbeiten oder löschen</span></div><div id="roundArchive"></div></article>
+  <article class="card"><h2>Rundendaten</h2><div id="roundArchive"></div></article>
 </section>
 </main>
 

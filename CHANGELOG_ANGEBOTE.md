@@ -8,9 +8,9 @@
 
 ## APS-Programmangebote
 
-- APS PLAY: 349 EUR, abzüglich 99 EUR Erstanalyse = 250 EUR Restbetrag.
-- APS ADAPT: 599 EUR, abzüglich 99 EUR Erstanalyse = 500 EUR Restbetrag.
-- APS PERFORM: 1.299 EUR, abzüglich 99 EUR Erstanalyse = 1.200 EUR Restbetrag.
+- APS PLAY: 499 EUR, abzüglich 99 EUR Erstanalyse = 400 EUR Restbetrag.
+- APS ADAPT: 799 EUR, abzüglich 99 EUR Erstanalyse = 700 EUR Restbetrag.
+- APS PERFORM: 1.490 EUR, abzüglich 99 EUR Erstanalyse = 1.391 EUR Restbetrag.
 - Jedes Angebot enthält Programminhalt, QR-Code und klickbaren Link.
 - Die Formulierung stellt transparent klar, dass die Erstanalyse bereits erbracht und vollständig angerechnet wurde.
 

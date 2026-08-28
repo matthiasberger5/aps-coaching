@@ -31,7 +31,7 @@
 .training-block p{margin:0;color:var(--muted)}
 .training-goal{padding:12px;border:1px solid #dfe7c1;border-radius:11px;background:#f8faef}
 
-@page{size:A4 portrait;margin:10mm}
+@page{size:A4 portrait;margin:12mm 12mm 14mm}
 @media print{
   :root{--ink:#162019;--muted:#566159;--paper:#fff;--card:#fff;--green:#173d2b;--green2:#2d6548;--lime:#c8df55;--line:#d8ded8;--shadow:none;--radius:3mm}
   html,body{width:auto!important;min-height:0!important;background:#fff!important;color:var(--ink);font-size:9.25pt;line-height:1.38}
@@ -214,24 +214,4 @@
   .offer-remainder strong{font-size:15pt}
   .offer-link{padding:2.3mm;border-radius:1.8mm;font-size:7.4pt}
   .offer-footer{margin-top:4mm;padding-top:3mm;font-size:7.5pt}
-}
-
-/* Archiv, Export und Druck-Update */
-.archive-list{display:grid;gap:10px}
-.archive-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 16px;border:1px solid var(--line);border-radius:13px;background:#fff}
-.archive-row.active{border-color:var(--green2);background:#f3f7f3}
-.archive-main{display:grid;gap:3px;min-width:0}
-.archive-main strong{font-size:1rem;color:var(--ink)}
-.archive-main span{color:var(--muted);font-size:.88rem}
-.archive-main small{color:var(--muted);font-size:.78rem;overflow-wrap:anywhere}
-.archive-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
-.archive-actions .danger{background:#f8ecea;color:var(--danger)}
-@media(max-width:700px){.archive-row{align-items:flex-start;flex-direction:column}.archive-actions{width:100%}.archive-actions .mini-btn{flex:1}}
-
-@media print{
-  html,body{width:auto!important;min-width:0!important}
-  body.print-document{background:#fff!important}
-  body.print-document .app-shell{max-width:none!important;width:auto!important;margin:0!important;padding:0!important}
-  #profile .archive-actions{display:none!important}
-  #profile .archive-row{break-inside:avoid-page;box-shadow:none}
 }
