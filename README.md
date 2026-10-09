@@ -71,3 +71,9 @@ Die Angebotsdaten können zentral in `js/app.js` über `ANALYSIS_CREDIT` und `AP
 - APS PLAY: 499 € − 99 € Erstanalyse = 400 € Restbetrag
 - APS ADAPT: 799 € − 99 € Erstanalyse = 700 € Restbetrag
 - APS PERFORM: 1.490 € − 99 € Erstanalyse = 1.391 € Restbetrag
+
+## Bio-Swing Dynamics Screening
+
+Das eigenständige Screening liegt unter `schwung-dna/`. Auf der bestehenden Cloudflare-Seite wird es mit `/schwung-dna/` am Ende der Startadresse geöffnet. Die bisherige APS-Startseite bleibt unter der Startadresse erreichbar.
+
+Das Screening enthält geführte Tests, automatische Kundentexte, passende Ergebnisbilder, eine Trainingsaufgabe und einen PDF-Download. Weitere Hinweise stehen in `schwung-dna/ANLEITUNG.txt`.
