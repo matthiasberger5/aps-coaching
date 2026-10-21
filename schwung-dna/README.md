@@ -1,12 +1,52 @@
 # Golf Schwung-DNA · Matthias Berger
 
-Statische Web-App für den 20-Minuten-Kurzcheck auf dem iPad. Kundendaten bleiben im geöffneten Browser; beim Neuladen werden sie gelöscht. PDF vor dem nächsten Teilnehmer sichern. E-Mail-Versand erfolgt manuell.
+Statische Web-App für den 20-Minuten-Bio-Swing-Screening auf dem iPad. Läuft komplett im Browser, ohne Server und ohne Build-Schritt.
 
-## Im bestehenden APS-Repository
+## Neu in Version 2
 
-Diese App liegt im Unterordner schwung-dna des Repositorys matthiasberger5/aps-coaching. Die APS-Analyse wird weiterhin über die bisherige Startadresse geöffnet. Das Screening wird über dieselbe Cloudflare-Adresse mit /schwung-dna/ am Ende geöffnet. Der vorhandene Cloudflare-Build muss den Repository-Stamm veröffentlichen, damit beide Apps enthalten sind.
+- **Geführter Ablauf** in sechs Schritten mit Fortschrittsanzeige, großen Auswahlkarten statt Dropdowns, Testanleitung zum Aufklappen, Live-Auswertung und einem 20-Minuten-Timer.
+- **Kundenverwaltung:** Kunden und alle bisherigen Checks werden automatisch auf dem Gerät gespeichert. Körpermaße werden beim nächsten Check übernommen. Verlaufsdiagramm der Schlagvergleiche pro Kunde.
+- **Trefferzahlen im Termin erfassen** (gewohnt / Vergleich von je fünf Bällen, Bewegungsgefühl) mit automatischer Auswertung und Vorschlag für das Ergebnis.
+- **Video-Abgleich (optional, Schritt 7):** Hüfte, Rückschwung- und Abschwungebene aus 1–2 Videos mit bestätigt / teilweise / weicht ab abgleichen; erscheint im Bericht als eigener Abschnitt.
+- **Ausgangslage:** Ziel und häufigster Fehlschlag im Profil, erscheinen auf Seite 1.
+- **Reicherer Bericht:** Profil auf einen Blick, Testübersicht, Grafiken zu Bewegungstyp, oberstem Punkt und Abschwungzone, Übungsbibliothek (40 Übungen) und Festigungs-Angebot (3 Termine à 50 Minuten, 199 €).
+- **Neues PDF:** mehrseitiger A4-Bericht mit Deckblatt und echtem Text (scharf, durchsuchbar, kopierbar) statt eines Bildes. Download, Teilen/Mail über das iPad-Menü und Drucken.
+- **Sicherung:** Export und Import aller Daten als Datei.
+- **Offline-fähig** nach dem ersten Laden (Service Worker).
 
-Auf dem iPad zunächst das Screening über /schwung-dna/ in Safari öffnen. Danach bei Bedarf Teilen → Zum Home-Bildschirm verwenden. PDF herunterladen und Teilen → Mail praktisch prüfen.
+## Daten und Datenschutz
+
+Name, E-Mail, Beschwerden und Testergebnisse werden im Browser dieses Geräts gespeichert (localStorage), nicht auf einem Server. Das schließt gesundheitsbezogene Angaben ein. Empfehlung: Gerätesperre aktivieren, Einwilligung der Kunden einholen, Sicherungsdateien geschützt aufbewahren. Beim Löschen der Safari-Website-Daten gehen die gespeicherten Kunden verloren; deshalb regelmäßig auf der Startseite „Sicherung herunterladen“ nutzen. Im privaten Modus speichert Safari nicht dauerhaft; die App weist dann darauf hin.
+
+## Installation im bestehenden Repository
+
+Diese App liegt im Unterordner `schwung-dna` des Repositorys `matthiasberger5/aps-coaching` und wird unter `/schwung-dna/` geöffnet. Die APS-Startseite bleibt unverändert.
+
+1. Im Repository den Inhalt des Ordners `schwung-dna` ersetzen: die alten Dateien `app.js`, `pdf.js`, `rules.js` und `index.html` entfallen bzw. werden überschrieben. Neu sind die Ordner `css`, `js` und `lib` sowie `sw.js`.
+2. Den gesamten Inhalt dieses Pakets in den Ordner `schwung-dna` hochladen (nicht die ZIP-Datei selbst).
+3. Cloudflare Pages baut bei jedem Commit auf `main` automatisch neu. Einstellungen unverändert: Framework preset `None`, Build command `exit 0`, Build output directory `.`.
+4. In Safari öffnen, ggf. Teilen → Zum Home-Bildschirm. Danach einmal online laden, damit der Offline-Betrieb aktiv wird.
+5. Mit Testdaten PDF herunterladen, in Dateien öffnen und Teilen → Mail prüfen.
+
+Nach Änderungen am Code in `sw.js` die Zeile `const CACHE='schwung-dna-v2-1'` hochzählen, damit Geräte den neuen Stand laden.
+
+## Dateien
+
+- `index.html` · Seitenrahmen
+- `css/styles.css` · Gestaltung (iPad, Handy, Druck)
+- `js/app.js` · Oberfläche, Kunden, Ablauf, Bericht
+- `js/rules.js` · fachliche Regeln (unverändert aus Version 1)
+- `js/model.js` · Berichtsmodell, Angebot (`OFFER`: Name, Termine, Preis), Testübersicht
+- `js/drills.js` · Übungsbibliothek
+- `js/store.js` · lokale Speicherung, Export/Import
+- `js/charts.js` · Grafiken für Bildschirm
+- `js/pdf.js` · PDF-Erzeugung (nutzt `lib/pdf-lib.min.js`, MIT-Lizenz)
+- `sw.js` · Offline-Betrieb
+- `tests/check.cjs` · automatische Prüfung
+
+## Prüfung
+
+Optional mit Node.js: `node tests/check.cjs` im Projektordner. Geprüft werden Regeln, alle 3.125 Kombinationen aus Armtest, Hip-Test, Vergleichspunkt, Ergebnis und Maßen (jede liefert gültige Übungen und Plan), Speicherung samt Export/Import und die PDF-Erzeugung für elf Sonderfälle (Beschwerden, offene Tests, Linksspieler, Sonderzeichen, lange Namen und Notizen). Die erzeugten PDFs liegen danach im Ordner `tmp-pdfs` neben dem Projekt.
 
 ## Vier Testblöcke, drei Kundenergebnisse
 
@@ -30,7 +70,7 @@ Der Kundenreport besteht aus drei Bereichen:
 
 Vor den drei Detailbereichen stehen die erste Aufgabe, drei konkrete Übungsschritte und die Entscheidung nach dem Vergleich. Eine kleine Tabelle hält Datum, Trefferzahlen (gewohnt / Vergleich, jeweils von fünf) und das Bewegungsgefühl aus zwei Einheiten fest. Die Felder bleiben zum Eintragen frei. Am Ende steht der Prüfschritt für den Folgetermin. Es gibt fünf Zustände: günstiger Vergleich, Vergleich noch nicht bestätigt/uneindeutig/gleich, ungünstiger Vergleich, offener Ansatz und Beschwerden. Nur ein Punkt wird gleichzeitig verändert. Auch ein günstiger Kurzvergleich ist noch kein Beleg für einen langfristigen Vorteil.
 
-Der erste Vergleichspunkt wird als eigene Arbeitsregel ausgewählt: Bei klarem Handtest und Slow/Fast-Hip-Ergebnis zunächst Griffvergleich; sonst Körperbewegung bei passendem Handtest; sonst verfügbare Rückschwungführung oder Abschwungzone. Eine explizite Auswahl des Trainers hat Vorrang. Diese Reihenfolge ist keine offizielle BSD-Prioritätsregel.
+Der erste Vergleichspunkt wird als eigene Arbeitsregel nach Klarheit gewählt: Alle vier Punkte (Körperbewegung, Griff, Rückschwungführung, Abschwungzone) erhalten 0–3 Klarheitspunkte, der eindeutigste steht vorn, die übrigen sind Themen für spätere Termine. Bei Gleichstand gilt Körperbewegung > Griff > Rückschwung > Abschwung. Das Angebot (3 Termine à 50 Minuten, 199 €) ist in js/model.js (`OFFER`) änderbar. Eine explizite Auswahl des Trainers hat Vorrang. Diese Reihenfolge ist keine offizielle BSD-Prioritätsregel.
 
 Der Grifftext erklärt eine kleine Veränderung der vorderen Hand über mehr/weniger sichtbare Fingerknöchel, bei unveränderter Schlagfläche und hinterer Hand. Die neutrale Stellung wird nicht mit einer universellen Knöchelzahl oder einem erfundenen Winkel berechnet. Zwei kurze Einheiten mit jeweils fünf gewohnten und fünf Vergleichsschlägen sind eine eigene Übungsplanung. Übernahme nur bei mehr sauberen Treffern in beiden Einheiten und mindestens ebenso angenehmem Gefühl; sonst gewohnt weiterspielen.
 
@@ -48,7 +88,7 @@ Bei Beschwerden entsteht keine automatische Änderungsaufgabe. Bei Linksspielern
 
 ## Bilder und Quellen
 
-Der Report verwendet Originale von E.A. Tischler / New Horizons Golf Approach, unverändert mit einer zusätzlichen Auswahlmarkierung im Rückschwungvergleich:
+Der Bericht verwendet Originale von E.A. Tischler / New Horizons Golf Approach, unverändert mit einer zusätzlichen Auswahlmarkierung im Rückschwungvergleich:
 - swing_path_under_sequence1a, swing_path_side-on_seqjuence1a und swing_path_on-top_sequence1a: automatisch ausgewählte Bildfolge zur hinteren Arm-/Handausrichtung in Abschnitt 1. Diese Bilder zeigen Armbewegungen, keine Nahaufnahme des Zweihandgriffs.
 - Swing_Track_3_topsets4: alle drei obersten Rückschwungpositionen im Vergleich.
 - slotting_-down_RDL_2: hüftnahe Abschwungzone.
@@ -70,14 +110,6 @@ Quellen:
 
 Das bleibt ein vorläufiges Coaching-Modell. Keine bestätigte Berechnung des einzig richtigen oder biomechanisch zwingend normalen Schwungs und keine behauptete vollständige Implementierung von Phil Allens Originalunterlage.
 
-## PDF und Prüfung
+## Hinweise
 
-Direkter PDF-Download; Text als hochauflösendes Bild eingebettet. Die vier Standardfälle (niedrig, mittel, hoch und unklare Maße) sowie zwei hochgeladene Kundenfälle wurden mit tatsächlichem Canvas-Rendering erzeugt und visuell geprüft: jeweils eine A4-Seite. Größere eigene Ergänzungen können zusätzliche Seiten erzeugen.
-
-Geprüft: Syntax, Reihenfolge, Feldzuordnung, automatische Armtest-Rückschwungführung, Trainingsaufgabe passend zum Vergleichspunkt, dokumentiertes Druckempfinden, vier Testblöcke, ungünstiger Schlagvergleich, Griffvorschlag und Vorrang des geprüften Griffs, alle Bewegungsansätze, getrennte Rück-/Abschwungzuordnung, Gleichheit, kleine Messdifferenzen, offene Tests, Beschwerden und Linksspieler. Der Browserdruck verwendet kompakte Schriftgrößen und zeigt Rück-/Abschwung nebeneinander. Die Trainingsaufgabe steht vorn; ihre Überschrift, Übung und Entscheidung werden per CSS zusammengehalten. Der reale Safari-Druck, Download und Mail auf dem iPad sind noch zu testen.
-
-Optionaler Entwicklertest: Node.js mit @napi-rs/canvas; im Projektordner node tests/check.cjs ausführen. QA-Dateien entstehen außerhalb des App-Ordners in tmp/pdfs.
-
-Entfernt auf Wunsch: Einleitung zum Ablauf, Bereitlege-Hinweis, optionale Kraft-/Dynamik-Auswahl mit Statusfeld und Fußnote im Kundenbericht/PDF. Bildquellen sind weiterhin in dieser Anleitung und SOURCES.json dokumentiert.
-
-Geprüft: automatische Priorität, Vorrang der Trainer-Auswahl, schwächerer/stärkerer Grifftext, uneindeutiger Vergleich als Versuch, ungünstiges Ergebnis ohne Änderungsübung, Beschwerden, getrennte Rückschwungführung und oberste Armposition.
+Das bleibt ein vorläufiges Coaching-Modell auf Basis öffentlich zugänglicher Lehrbeispiele. Keine bestätigte Berechnung des einzig richtigen oder biomechanisch zwingend normalen Schwungs und keine vollständige Umsetzung einer offiziellen Zertifizierungsunterlage. Der reale Safari-Download, das Teilen-Menü und Mail auf dem iPad sind vor dem ersten Kundeneinsatz zu testen.
