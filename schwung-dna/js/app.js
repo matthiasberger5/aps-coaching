@@ -34,12 +34,22 @@ function paintSave(){const e=$('#savestate');if(!e)return;const ok=Store.persist
 
 // ---------- Timer ----------
 const elapsed=()=>S.timer.acc+(S.timer.run?Date.now()-S.timer.start:0);
+const fmtT=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function saveTimer(){if(!S.sessionId)return;try{localStorage.setItem('schwungdna.timer',JSON.stringify({sid:S.sessionId,...S.timer}));}catch(e){}}
+function loadTimer(sid){try{const t=JSON.parse(localStorage.getItem('schwungdna.timer')||'null');if(t&&t.sid===sid)return {run:!!t.run,start:t.start||0,acc:t.acc||0};}catch(e){}return null;}
+function startTimer(){if(S.timer.run)return;S.timer.start=Date.now();S.timer.run=true;saveTimer();paintTimer();}
+function pauseTimer(){if(!S.timer.run)return;S.timer.acc+=Date.now()-S.timer.start;S.timer.run=false;saveTimer();paintTimer();}
+// Sollzeit: bis Ende des aktuellen Schritts darf die Zeit laufen (Schritt 7 = Bericht = Gesamtzeit)
+const planEnd=step=>STEP_MIN.slice(0,Math.min(step,6)+1).reduce((a,b)=>a+b,0)*60;
 function paintTimer(){
- const t=$('#timer');if(!t)return;const ms=elapsed(),s=Math.floor(ms/1000),mm=String(Math.floor(s/60)).padStart(2,'0'),ss=String(s%60).padStart(2,'0');
- t.className='timer'+(S.timer.run?' run':'')+(s>20*60?' over':'');t.innerHTML=`<span class="dot"></span><span>${mm}:${ss}</span><span class="muted">/ 20:00</span>`;
+ const t=$('#timer');if(!t)return;const s=Math.floor(elapsed()/1000),started=S.timer.run||S.timer.acc>0;
+ const allowed=planEnd(S.step),late=s-allowed,isLate=started&&late>0;
+ t.className='timer'+(S.timer.run?' run':'')+(started?(isLate?' late':' ok'):'');
+ t.innerHTML=`<span class="dot"></span><span>${fmtT(s)}</span><span class="muted">/ 20:00</span>${isLate?`<span class="delta">+${fmtT(late)}</span>`:''}`;
+ t.title=started?(isLate?'Im Zeitrückstand: '+fmtT(late)+' über Plan':'Im Zeitplan'):'Startet automatisch mit dem Namen';
 }
 setInterval(paintTimer,1000);
-document.addEventListener('click',e=>{const t=e.target.closest('#timer');if(!t)return;if(S.timer.run){S.timer.acc+=Date.now()-S.timer.start;S.timer.run=false;}else{S.timer.start=Date.now();S.timer.run=true;}paintTimer();});
+document.addEventListener('click',e=>{const t=e.target.closest('#timer');if(!t)return;S.timer.run?pauseTimer():startTimer();});
 
 // ---------- Routing ----------
 function go(hash){if(location.hash===hash)route();else location.hash=hash;}
@@ -96,7 +106,7 @@ function startCheck(clientId){
  const inputs=DEFAULT_INPUTS(),prev=Store.sessions(c.id).slice(-1)[0];
  if(prev){['height','span','upper','fore'].forEach(k=>inputs[k]=prev.inputs[k]||'');inputs._prefilled=prev.inputs.date;}
  const s=Store.newSession(c.id,inputs);
- S.timer={run:false,start:0,acc:0};
+ S.timer={run:!!(c.name&&c.name.trim()),start:Date.now(),acc:0};try{localStorage.setItem('schwungdna.timer',JSON.stringify({sid:s.id,...S.timer}));}catch(e){}
  go('#/check/'+s.id+'/0');
 }
 
@@ -161,7 +171,7 @@ const STEP_VIEW=[
   <div class="field"><label>Ziel</label><div class="choices c4">${['Länge','Konstanz','Schmerzfrei spielen','Mehr Kontrolle'].map(v=>choice('goal',v,v,'','')).join('')}</div></div>
   <div class="field"><label>Häufigster Fehlschlag</label><div class="choices c5">${['Slice','Hook','Fat','Top','Unterschiedlich'].map(v=>choice('miss',v,v,'','')).join('')}</div></div>
   ${S.inputs._prefilled?`<div class="result"><b>Übernommen</b>Die Körpermaße stammen aus dem Check vom ${esc(fmtDateLong(S.inputs._prefilled))}. Bitte in Schritt 3 kurz prüfen.</div>`:''}
-  <div class="callout"><b>Ablauf (20 Minuten):</b> Vorbereitung 1 · Armtest 3 · Vermessung 3 · Post 3 · Hip-Speed 3 · Schlagvergleich 4 · Video 3. Der Timer oben rechts startet mit einem Tipp.</div>`;},
+  <div class="callout"><b>Ablauf (20 Minuten):</b> Vorbereitung 1 · Armtest 3 · Vermessung 3 · Post 3 · Hip-Speed 3 · Schlagvergleich 4 · Video 3. Der Timer oben rechts startet automatisch, sobald du den Namen eingibst. Grün bedeutet im Zeitplan, rot im Rückstand. Mit einem Tipp pausierst du ihn.</div>`;},
  // 1 Arm
  ()=>`<h2>Arm-Pendeltest</h2><p class="lead">Wohin zeigt die Handfläche der hinteren Hand?</p>
   ${guide([['Aufstellen','Kunde beugt sich aus der Hüfte vor, Hände gleiten über die Oberschenkel, Mittelfingerspitzen erreichen den oberen Kniebereich. Arme entspannt hängen lassen.'],['Durchführen','Handflächen zusammenlegen; die hintere Hand etwas tiefer wie am Griff. Arme locker zurückschwingen, Schultern dabei ruhig halten. Etwa auf Hüfthöhe stoppen; hinterer Ellenbogen darf sich natürlich beugen. Zweimal wiederholen.'],['Beobachten','Wohin zeigt die Handfläche der hinteren Hand? Keine Stellung vorgeben oder hinbiegen.']])}
@@ -226,7 +236,7 @@ function stepDone(i,inp=S.inputs){
 }
 function viewCheck(sid,step){
  const s=Store.session(sid);
- if(S.sessionId!==sid){S.sessionId=sid;S.inputs={...DEFAULT_INPUTS(),...s.inputs};S.clientId=s.clientId;}
+ if(S.sessionId!==sid){S.sessionId=sid;S.timer=loadTimer(sid)||{run:false,start:0,acc:0};S.inputs={...DEFAULT_INPUTS(),...s.inputs};S.clientId=s.clientId;}
  S.step=step;
  $('#savestate').hidden=false;$('#timerslot').innerHTML='<button type="button" id="timer" class="timer" aria-label="Timer starten oder anhalten"></button>';paintTimer();
  const c=Store.client(S.clientId);
@@ -255,7 +265,7 @@ function bindCheck(){
  app.onclick=e=>{
   const g=e.target.closest('[data-go]');if(g){go('#/check/'+S.sessionId+'/'+g.dataset.go);return;}
   if(e.target.closest('#prev')){S.step===0?go('#/client/'+S.clientId):go('#/check/'+S.sessionId+'/'+(S.step-1));return;}
-  if(e.target.closest('#next')){S.step===6?go('#/report/'+S.sessionId):go('#/check/'+S.sessionId+'/'+(S.step+1));return;}
+  if(e.target.closest('#next')){if(S.step===0&&!S.timer.run&&S.timer.acc===0)startTimer();S.step===6?(pauseTimer(),go('#/report/'+S.sessionId)):go('#/check/'+S.sessionId+'/'+(S.step+1));return;}
   const side=e.target.closest('[data-client-side]');if(side){Store.saveClient({id:S.clientId,side:side.dataset.clientSide});$$('#side button').forEach(b=>b.setAttribute('aria-pressed',b===side));refreshLive();return;}
   const ch=e.target.closest('[data-k]');
   if(ch){
@@ -271,7 +281,7 @@ function bindCheck(){
  app.oninput=e=>{
   const t=e.target;
   if(t.dataset.in){S.inputs[t.dataset.in]=t.value;queueSave();refreshLive();}
-  if(t.dataset.client){Store.saveClient({id:S.clientId,[t.dataset.client]:t.value});refreshLive();}
+  if(t.dataset.client){Store.saveClient({id:S.clientId,[t.dataset.client]:t.value});if(t.dataset.client==='name'&&t.value.trim()&&!S.timer.run&&S.timer.acc===0)startTimer();refreshLive();}
  };
 }
 const POST_TXT={Front:'Ansatz: Drehung über die vordere Seite, ohne das Becken seitlich zu erzwingen.',Center:'Ansatz: mittige Drehung; keine zusätzliche Seitverschiebung erzwingen.',Rear:'Ansatz: rückseitigen Drehpunkt im Rückschwung zulassen. Die Bewegung zum Ziel separat prüfen.'};

@@ -26,6 +26,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .save-state.warn i{background:var(--warn)}
 .timer{font-variant-numeric:tabular-nums;font-weight:600;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:30px;padding:6px 12px;display:flex;align-items:center;gap:8px;cursor:pointer}
 .timer.over{color:var(--warn);border-color:#e9c9ae}
+.timer.ok{background:#e4f2e8;border-color:#9fcdb0;color:#1d5a3a}.timer.ok .dot{background:#2f9e5f}
+.timer.late{background:#fbe3e1;border-color:#e2a29d;color:#a12a22}.timer.late .dot{background:#d23b32}.timer .delta{font-weight:700}
 .timer .dot{width:8px;height:8px;border-radius:50%;background:var(--faint)}.timer.run .dot{background:#4aa36f;animation:pulse 1.6s infinite}
 @keyframes pulse{50%{opacity:.3}}
 
