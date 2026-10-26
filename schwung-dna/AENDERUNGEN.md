@@ -1,3 +1,37 @@
+# Schwung-DNA · Fachliche Prüfung und Korrekturen (26.10.2026, zweite Runde)
+
+Alle Tests und Schlussfolgerungen wurden gegen die Quellen geprüft: Adams/Najar (fünf Tests), Adams (Griff ↔ Bewegungstyp),
+Doniger/Adams (Armtest), GolfWRX-BioSwing-Artikel (Maße → Ebenen), Schmedes (Hüfttempo → Griff).
+
+## Bestätigt (unverändert)
+- Spannweite länger/gleich/kürzer als Körpergröße → vorderer Arm über/auf/unter der Schulterlinie.
+- Ellenbogen–mittlerer Knöchel länger/gleich/kürzer als Oberarm → Schulter-/Rumpf-/Hüftzone.
+- Armtest: Under = Arm faltet körpernah, On Top = höher; Hüfttempo langsam → schwächer, schnell → stärker.
+
+## Korrigiert
+- **Bewegungstyp (Glide/Spin/Launch)** kam bisher nur aus dem Armtest. Nach Adams/Najar entscheiden fünf Tests per Mehrheit
+  (Armtest, Post-Test, Hüfttempo, Spannweite, Armmaße). Bei Gleichstand wird kein Typ festgelegt.
+- **Post-Test** zählte immer als Bestätigung, auch wenn er in eine andere Richtung zeigte. Jetzt eine eigene Stimme.
+- **Griff (Punkt 5):** Zeigen Hüfttempo (vordere Hand) und Armtest (hintere Hand) in entgegengesetzte Richtungen,
+  gibt es keine automatische Griffänderung mehr, sondern den Hinweis, den Griff im Termin am Ballflug zu prüfen.
+- **Griffanweisung:** statt „mehr/weniger Knöchel als gewohnt“ feste Zielwerte nach Schmedes (etwa 2 bzw. 3–3,5 Knöchel,
+  neutral: V zum hinteren Auge). Ist der Zielwert schon erreicht, bleibt der Griff unverändert.
+- **Glide-Übungen:** Becken zum Ziel, Kopf und Oberkörper bleiben zurück (vorher glitt der Oberkörper mit).
+- **Hüft-Übungen** wollten das Hüfttempo verändern. Jetzt Aufstellungs-Anpassung nach Schmedes, optional nach dem Griffvergleich.
+- **Messtoleranz (Punkt 7):** Unterschiede bis 2 cm gelten als nahezu gleich; Anleitung „zweimal messen, Mittelwert eintragen“.
+- **Rangfolge (Punkt 6):** Punkte nach Eindeutigkeit (Mehrheit der Tests, Übereinstimmung der Hände, Abstand der Maße);
+  Spin als mittlerer Typ höchstens 1 Punkt; Gleichstand wird im Bericht benannt.
+- **Quellenlinks** in der App auf die geprüften Artikel aktualisiert.
+
+## Umgesetzt
+- Fehler 1–4: Auswahlkarten, Trefferzahlen auf dem Handy, Rangliste, Kleinschreibung; dazu Datumsfeld auf dem Handy.
+- Punkt 8: alle Übungen mit Eisen 7; Ausgangswert (10 Bälle) nur, solange noch kein Vergleichspunkt feststeht.
+- Punkt 9: eine Hauptübung, Warm-up, höchstens zwei optionale Übungen (vorher bis zu sechs).
+- Punkt 10: „Sonderpreis bis …“ = Check-Datum + 1 Monat.
+- Tests: 125 Prüfungen bestanden; Massentest über 82.500 Eingabekombinationen ohne Widerspruch.
+
+---
+
 # Schwung-DNA · Korrekturen vom 26.10.2026
 
 Geänderte Dateien (in den Ordner `schwung-dna` des Repositorys hochladen und überschreiben):

@@ -261,8 +261,9 @@ async function createReportPDF(r,opts={}){
    for(let d=0;d<3;d++)circle(W-M-14-(2-d)*14-0,y-hh/2,4.6,row.score>d?{fill:isFocus?C.green:C.green2}:{stroke:'#aab6ac',sw:1});
    y-=hh+4;
   });
-  textAt('Je deutlicher ein Testergebnis vom mittleren Bereich abweicht, desto weiter vorn steht der Punkt (drei Punkte: sehr deutlich, zwei: deutlich, einer: leicht). Der Punkt mit der meisten Klarheit ist dein erster Vergleichspunkt; die weiteren sind Themen für die nächsten Termine.',M,y-4,{s:8.2,color:C.muted});
-  y-=textH('x'.repeat(250),{s:8.2})+12;
+  y-=4;
+  if(r.model.tieNote)para(r.model.tieNote,{s:9.4,gap:4});
+  para(RANKING_NOTE+' (Drei Punkte: sehr deutlich, zwei: deutlich, einer: leicht.)',{s:8.2,color:C.muted,gap:12});
  }
  y-=4;
  if(r.video){
@@ -278,7 +279,7 @@ async function createReportPDF(r,opts={}){
  // ================= 1 · Bewegungsansatz & Griff =================
  if(!r.model.restricted){
   newPage();
-  section(1,'Dein Bewegungsansatz und Griff','Aus Arm-Pendeltest, Post-Test und Hip-Speed-Test.');
+  section(1,'Dein Bewegungsansatz und Griff','Bewegungstyp aus allen fünf Tests, Griff aus Arm-Pendeltest und Hip-Speed-Test.');
   const bodyKey=r.gripPicture||r.bodyPicture,imgW=150,gap=20,tw2=bodyKey&&img[bodyKey]?CW-imgW-gap:CW;
   const top1=y;
   let ty=y;
@@ -293,8 +294,7 @@ async function createReportPDF(r,opts={}){
   need(70);
   spaced('DEIN BEWEGUNGSTYP IM MODELL',M,y-8,{s:7.5,color:C.green2});y-=18;
   y-=triple(POWER,r.power?.key,M,y,CW,46)+14;
-  textAt('Glide: kleine seitliche Bewegung zum Ziel · Spin: stärker drehende Körperbewegung · Launch: Druck in den Boden und Aufrichten. Zuordnung aus dem Handtest, keine Messung von Bodenkräften.',M,y,{s:8.3,color:C.muted});
-  y-=textH('x'.repeat(260),{s:8.3})+14;
+  para('Glide: Becken bewegt sich zum Ziel, Oberkörper bleibt zurück · Spin: drehende Körperbewegung · Launch: Druck in den Boden und Aufrichten. Zuordnung nach der Mehrheit aus Armtest, Post-Test, Hip-Speed-Test, Spannweite und Armmaßen; keine Messung von Bodenkräften.',{s:8.3,color:C.muted,gap:14});
   section('','Deine Testergebnisse im Überblick');
   table([128,200,CW-328],['Test','Beobachtung','Ergebnis im Modell'],testOverview(r).map(o=>[o.test,o.seen,o.result]));
  }
@@ -343,10 +343,10 @@ async function createReportPDF(r,opts={}){
    if(d.reps){page.drawText(clean('Umfang: '+d.reps),{x:M+16,y:ty-9,size:8.5,font:F.b,color:hex(C.muted)});}
    y=top-h-10;
   };
-  const focus=r.drills.focus||[];
-  if(focus.length){spaced(('Für deinen Vergleichspunkt: '+r.model.focusName).toUpperCase(),M,y-8,{s:7.5,color:C.green2});y-=20;focus.forEach(d=>drillCard(d,false));}
-  need(40);y-=4;spaced('GRUNDLAGEN FÜR JEDE EINHEIT',M,y-8,{s:7.5,color:C.green2});y-=20;
-  (r.drills.basis||[]).filter(Boolean).forEach(d=>drillCard(d,true));
+  const label=t=>{need(40);y-=4;spaced(t.toUpperCase(),M,y-8,{s:7.5,color:C.green2});y-=20;};
+  if(r.drills.main){label('Deine Hauptübung · '+r.model.focusName);drillCard(r.drills.main,false);}
+  label('Vor jeder Einheit');(r.drills.basis||[]).forEach(d=>drillCard(d,true));
+  if((r.drills.optional||[]).length){label('Optional, wenn du mehr Zeit hast');r.drills.optional.forEach(d=>drillCard(d,true));}
  }
 
  // ================= Angebot =================

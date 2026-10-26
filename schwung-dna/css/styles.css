@@ -172,7 +172,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid rgba(47,106,79,.25);bo
 .decision .yes{background:var(--mint)}.decision .yes small{color:var(--green2)}.decision .yes b{font-size:14.5px}
 .decision .no{background:#f6f7f3;border:1px solid var(--line)}.decision .no small{color:var(--muted)}.decision .no p{margin:0;color:var(--muted);font-size:14.5px}
 .ranking{display:grid;gap:6px;margin:6px 0 8px}
-.rank{display:grid;grid-template-columns:28px 150px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fff}
+.rank{display:grid;grid-template-columns:28px minmax(0,190px) minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fff}
 .rank.on{background:var(--mint);border-color:var(--mint2)}.rank.on b{color:var(--green)}
 .rank .rn{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:#dfe5dc;color:var(--muted);font-weight:700;font-size:12px}.rank.on .rn{background:var(--green);color:#fff}
 .rank .rf{font-size:13.5px;color:#33443a}
@@ -233,3 +233,16 @@ dialog{border:0;border-radius:20px;padding:26px;max-width:460px;width:calc(100% 
 .field>label.consent input{width:22px;height:22px;flex:0 0 auto;margin:1px 0 0;accent-color:#1f4a37}
 .field>label.consent b{display:block;margin-bottom:2px}
 #consentbox.attention>label.consent{outline:2px solid var(--warn,#a3501f);outline-offset:2px}
+/* Auswahl „Was wird einzeln verglichen?“: fünf Karten, Titel nie abschneiden */
+.choices.focus5{grid-template-columns:repeat(auto-fill,minmax(165px,1fr))}
+.choice b,.rank b{overflow-wrap:break-word;hyphens:auto;-webkit-hyphens:auto}
+.choice{min-width:0}
+/* Trefferzahlen: Knöpfe dürfen schrumpfen; auf schmalen Bildschirmen untereinander */
+.stepper-num.six button{min-width:0}
+@media(max-width:640px){.grid2.hits{grid-template-columns:1fr}}
+/* Optionale Übungen */
+details.optional-drills{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+details.optional-drills>summary{cursor:pointer;font-weight:700;color:var(--green);padding:6px 0}
+/* Datumsfeld darf in schmalen Spalten schrumpfen */
+.grid2>*,.grid3>*{min-width:0}
+input[type=date]{min-width:0;max-width:100%}

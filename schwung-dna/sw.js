@@ -1,5 +1,5 @@
 // Offline-Betrieb: Netz zuerst, bei fehlendem Netz der zuletzt geladene Stand. Nur Dateien dieser App.
-const CACHE='schwung-dna-v2-6';
+const CACHE='schwung-dna-v2-7';
 const ASSETS=['./','index.html','css/styles.css','js/rules.js','js/drills.js','js/model.js','js/store.js','js/charts.js','js/pdf.js','js/app.js','lib/pdf-lib.min.js','manifest.webmanifest','icon.png',
  'assets/grip/comparison.png','assets/new-horizons/Swing_Track_3_topsets4-375x190.png','assets/new-horizons/slotting_-down_RDL_2-405x231.png','assets/new-horizons/slotting_-cross_RDL_2-405x217.png','assets/new-horizons/slotting_-shoulder_RDL_2-405x226.png','assets/new-horizons/swing_path_under_sequence1a-360x131.png','assets/new-horizons/swing_path_side-on_seqjuence1a-360x143.png','assets/new-horizons/swing_path_on-top_sequence1a-360x139.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});

@@ -187,32 +187,32 @@ const STEP_VIEW=[
   <div class="callout"><b>Ablauf (20 Minuten):</b> Vorbereitung 1 · Armtest 3 · Vermessung 3 · Post 3 · Hip-Speed 3 · Schlagvergleich 4 · Video 3. Der Timer oben rechts startet automatisch, sobald du den Namen eingibst. Grün bedeutet im Zeitplan, rot im Rückstand. Mit einem Tipp pausierst du ihn.</div>`;},
  // 1 Arm
  ()=>`<h2>Arm-Pendeltest</h2><p class="lead">Wohin zeigt die Handfläche der hinteren Hand?</p>
-  ${guide([['Aufstellen','Kunde beugt sich aus der Hüfte vor, Hände gleiten über die Oberschenkel, Mittelfingerspitzen erreichen den oberen Kniebereich. Arme entspannt hängen lassen.'],['Durchführen','Handflächen zusammenlegen; die hintere Hand etwas tiefer wie am Griff. Arme locker zurückschwingen, Schultern dabei ruhig halten. Etwa auf Hüfthöhe stoppen; hinterer Ellenbogen darf sich natürlich beugen. Zweimal wiederholen.'],['Beobachten','Wohin zeigt die Handfläche der hinteren Hand? Keine Stellung vorgeben oder hinbiegen.']])}
+  ${guide([['Aufstellen','Kunde beugt sich aus der Hüfte vor, Hände gleiten über die Oberschenkel, Mittelfingerspitzen erreichen den oberen Kniebereich. Arme entspannt hängen lassen.'],['Durchführen','Handflächen zusammenlegen; die hintere Hand etwas tiefer, so wie am Griff. Arme locker zurückschwingen, Schultern dabei ruhig halten. Etwa auf Hüfthöhe stoppen; hinterer Ellenbogen darf sich natürlich beugen. Zweimal wiederholen.'],['Beobachten','Wohin zeigt die Handfläche der hinteren Hand? Keine Stellung vorgeben oder hinbiegen.']])}
   <div class="choices c2">
    ${choice('fold','Side/Under','Nach oben · Under','Handfläche eher nach oben')}
    ${choice('fold','Side On','Seitlich · Side On','Handfläche eher seitlich')}
    ${choice('fold','On Top','Zum Boden · On Top','Handfläche eher zum Boden')}
    ${choice('fold','Uneindeutig','Uneindeutig','Bei Wiederholung unterschiedlich','neutral')}
   </div>${result('arm')}
-  <p class="hint">Handstellung der hinteren Hand und ein Ansatz für die Rückschwungführung. Der höchste Rückschwungpunkt folgt erst mit Größe und Spannweite. Die drei Gruppen sind eine vereinfachte Erfassung; Übergangsformen bleiben offen.</p>
-  ${src([['Durchführung: Doniger / Adams','https://golf.com/instruction/grip-golf-club-test-can-tell-you/'],['Armfaltung und Ebenen: Spallone','https://appmesolutions.wixsite.com/vero-golf-pro/bioswing-dynamics-certification-exam']])}`,
+  <p class="hint">Ergibt den Griff der hinteren Hand, einen Ansatz für die Rückschwungführung und eine von fünf Stimmen für den Bewegungstyp. Der höchste Rückschwungpunkt folgt erst aus Größe und Spannweite. Die drei Gruppen sind eine vereinfachte Erfassung; Übergangsformen bleiben offen.</p>
+  ${src([['Durchführung: Doniger / Adams','https://golf.com/instruction/how-discover-best-grip-your-body-type/'],['Armfaltung: GOLF','https://golf.com/instruction/which-backswing-works-best-for-you/']])}`,
  // 2 Maße
  ()=>`<h2>Körperproportionen</h2><p class="lead">Vier Maße bestimmen den obersten Punkt im Rückschwung und die Abschwungzone.</p>
-  ${guide([['Größe und Spannweite','Ohne Schuhe aufrecht messen. Arme seitlich auf Schulterhöhe strecken, Ellenbogen gerade. Spannweite von einer Mittelfingerspitze zur anderen.'],['Armmaße','An der hinteren Schlagarmseite vom Schultergelenk zum Ellenbogen und vom Ellenbogen zum mittleren Fingerknöchel messen. Das zweite Maß enthält den Handanteil; keine Unterarmlänge bis zum Handgelenk eintragen.'],['Prüfen','Messpunkte einheitlich wählen und kleine Unterschiede erneut messen.']])}
+  ${guide([['Größe und Spannweite','Ohne Schuhe aufrecht messen. Arme seitlich auf Schulterhöhe strecken, Ellenbogen gerade. Spannweite von einer Mittelfingerspitze zur anderen.'],['Armmaße','An der hinteren Schlagarmseite vom Schultergelenk zum Ellenbogen und vom Ellenbogen zum mittleren Fingerknöchel messen. Das zweite Maß enthält den Handanteil; keine Unterarmlänge bis zum Handgelenk eintragen.'],['Prüfen','Jedes Maß zweimal messen und den Mittelwert eintragen. Weichen beide Messungen um mehr als 1 cm ab, ein drittes Mal messen.']])}
   <div class="grid2">${numField('height','Körpergröße',100,230)}${numField('span','Spannweite: Mittelfingerspitze–Mittelfingerspitze',90,250)}${numField('upper','Schultergelenk–Ellenbogen',15,65)}${numField('fore','Ellenbogen–mittlerer Fingerknöchel',15,70)}</div>
   <div class="grid2"><div data-live="chart1"></div><div data-live="chart2"></div></div>
   ${result('measure')}
-  <p class="hint">Spannweite im Verhältnis zur Größe: vorderer Arm am höchsten Rückschwungpunkt. Ellenbogen–Fingerknöchel im Verhältnis zum Oberarm: Abschwungzone. Ungleiche Differenzen bis 1 cm bleiben zur Nachmessung offen (eigene Arbeitsregel, kein offizieller Grenzwert).</p>
-  ${src([['Messung und Ebenen','https://www.advanceddynamicgolfcenter.com/post/what-is-bio-swing-mechanics']])}`,
+  <p class="hint">Spannweite im Verhältnis zur Größe: vorderer Arm am höchsten Rückschwungpunkt. Ellenbogen–Fingerknöchel im Verhältnis zum Oberarm: Abschwungzone. Unterschiede bis 2 cm gelten wegen üblicher Messabweichungen als nahezu gleich (eigene Arbeitsregel, kein offizieller Grenzwert). Beide Vergleiche zählen außerdem als je eine Stimme für den Bewegungstyp.</p>
+  ${src([['Messung und Ebenen','https://golfwrx.com/181715/biomechanics-and-how-they-affect-swing-plane/'],['Bewegungstyp: Adams / Najar','https://golf.com/instruction/five-easy-tests-to-gain-at-least-20-yards-with-your-driver/']])}`,
  // 3 Post
- ()=>`<h2>Post-/Pivot-Test</h2><p class="lead">Wie bewegt sich das Becken im Rückschwung?</p>
-  ${guide([['Aufstellen','In Golfhaltung einen Schläger quer an die Oberschenkel legen.'],['Durchführen','Langsam in einen Rückschwung drehen, Schläger an den Oberschenkeln halten. Zweimal wiederholen.'],['Beobachten','Bleibt das Becken mittig, bewegt es sich zur hinteren Seite oder zur vorderen? Kunde beschreibt zusätzlich, unter welchem Fuß er mehr Druck spürt.']])}
+ ()=>`<h2>Post-/Pivot-Test</h2><p class="lead">Wohin geht das Gewicht beim Drehen in den Rückschwung?</p>
+  ${guide([['Aufstellen','In Golfhaltung einen Schläger quer an die Oberschenkel legen.'],['Durchführen','Langsam in einen Rückschwung drehen, Schläger an den Oberschenkeln halten. Zweimal wiederholen.'],['Beobachten','Bleibt das Gewicht mittig, geht es aufs hintere Bein oder aufs vordere Bein? Kunde beschreibt zusätzlich, unter welchem Fuß er mehr Druck spürt.']])}
   <div class="eyebrow" style="margin:6px 0">Beobachtete Drehachse</div>
-  <div class="choices c2">${choice('post','Front','Vordere Seite · Front Post','Becken eher zur vorderen Seite')}${choice('post','Center','Mittig · Center Post','Becken bleibt mittig')}${choice('post','Rear','Hintere Seite · Rear Post','Becken eher zur hinteren Seite')}${choice('post','Unclear','Uneindeutig','Bewegung nicht klar erkennbar','neutral')}</div>
+  <div class="choices c2">${choice('post','Front','Vorderes Bein · Front Post','Gewicht geht eher aufs vordere Bein')}${choice('post','Center','Mittig · Center Post','Gewicht bleibt mittig')}${choice('post','Rear','Hinteres Bein · Rear Post','Gewicht geht eher aufs hintere Bein')}${choice('post','Unclear','Uneindeutig','Bewegung nicht klar erkennbar','neutral')}</div>
   <div class="eyebrow" style="margin:18px 0 6px">Druckempfinden im Rückschwung (optional)</div>
   <div class="choices c4 keep2">${choice('pressure','front','Vorderer Fuß','')}${choice('pressure','center','Beide ähnlich','')}${choice('pressure','rear','Hinterer Fuß','')}${choice('pressure','unclear','Nicht spürbar','','neutral')}</div>
   ${result('post')}
-  <p class="hint">Die Drehachse hilft, die Körperbewegung zu organisieren. Das Druckempfinden ist eine Rückmeldung, keine gemessene Druckverteilung. Rear Post fordert nicht dazu auf, im Treffmoment das Gewicht hinten zu lassen.</p>
+  <p class="hint">Eine von fünf Stimmen für den Bewegungstyp: hinteres Bein spricht für Glide, mittig für Spin, vorderes Bein für Launch. Das Druckempfinden ist eine Rückmeldung, keine gemessene Druckverteilung. Rear Post heißt nicht, im Treffmoment das Gewicht hinten zu lassen.</p>
   ${src([['Durchführung: Adams / Najar','https://golf.com/instruction/five-easy-tests-to-gain-at-least-20-yards-with-your-driver/'],['Begriffe: E.A. Tischler','https://newhorizonsgolf.com/BioSwingDynamics.html']])}`,
  // 4 Hip
  ()=>`<h2>Hip-Speed-Test</h2><p class="lead">Hüfte, Arme und Griff der vorderen Hand abstimmen.</p>
@@ -226,8 +226,8 @@ const STEP_VIEW=[
   ${guide([['So läuft der Vergleich','Mit Eisen 7 fünf lockere Bälle gewohnt schlagen, dann fünf mit dem angezeigten Ansatz. Nur einen Punkt ändern: Bewegung, Griff oder Armführung. Saubere Treffer zählen und das Bewegungsgefühl vergleichen.']])}
   ${result('compare')}
   <div class="eyebrow" style="margin:18px 0 6px">Was wird einzeln verglichen?</div>
-  <div class="choices c3 keep2" style="grid-template-columns:repeat(auto-fit,minmax(125px,1fr))">${choice('focus','','Automatisch','Vorgeschlagener Punkt')}${choice('focus','motion','Körperbewegung','')}${choice('focus','grip','Griffansatz','')}${choice('focus','back','Rückschwung','Führung & oberster Punkt')}${choice('focus','down','Abschwungzone','')}</div>
-  <div class="grid2" style="margin-top:20px"><div class="field"><label>Saubere Treffer · gewohnt (von 5)</label>${hitButtons('hitsHabit')}</div><div class="field"><label>Saubere Treffer · Vergleich (von 5)</label>${hitButtons('hitsCompare')}</div></div>
+  <div class="choices focus5">${choice('focus','','Automatisch','Vorgeschlagener Punkt')}${choice('focus','motion','Körperbewegung','')}${choice('focus','grip','Griffansatz','')}${choice('focus','back','Rückschwung','Führung & oberster Punkt')}${choice('focus','down','Abschwungzone','')}</div>
+  <div class="grid2 hits" style="margin-top:20px"><div class="field"><label>Saubere Treffer · gewohnt (von 5)</label>${hitButtons('hitsHabit')}</div><div class="field"><label>Saubere Treffer · Vergleich (von 5)</label>${hitButtons('hitsCompare')}</div></div>
   <div class="field"><label>Bewegungsgefühl im Vergleich</label><div class="choices c3">${choice('feel','better','Angenehmer','')}${choice('feel','same','Gleich','')}${choice('feel','worse','Schlechter','')}</div></div>
   <div data-live="verdict"></div>
   <div class="field"><label>Ergebnis des Schlagvergleichs</label><div class="choices c4 keep2">${choice('trial','better','Besser','Mehr saubere Treffer, angenehmer')}${choice('trial','same','Gleich','Kein klarer Unterschied')}${choice('trial','worse','Ungünstiger','')}${choice('trial','unclear','Uneindeutig','','neutral')}</div></div>
@@ -322,10 +322,11 @@ function refreshLive(){
  const R=(label,t)=>`<b>${label}</b>${esc(t)}`;
  if(m.restricted){['arm','measure','post','hip','compare'].forEach(k=>setLive(k,R('Hinweis','Bei Beschwerden diesen Test auslassen oder anpassen. Keine automatische Änderungsaufgabe.'),'warn'));}
  else{
-  setLive('arm',m.armback?R(m.armback.name,(r.power?.grip||'')+' '+(r.power?.text||'')):'Handstellung nach dem Pendeln auswählen.',m.armback?'':'empty');
+  setLive('arm',m.armback?R(m.armback.name,m.handGrip+' '+m.armback.text+' Der Bewegungstyp ergibt sich erst aus allen Tests.'):'Handstellung nach dem Pendeln auswählen.',m.armback?'':'empty');
   setLive('measure',[r.back?.name,r.down?.name].filter(Boolean).length?R('Zuordnung',[r.back?.name,r.down?.name].filter(Boolean).join(' · ')):'Vier Maße erfassen; die beiden Zuordnungen entstehen automatisch.',[r.back?.name,r.down?.name].filter(Boolean).length?'':'empty');
   setLive('post',(POST_TXT[i.post]||'')?R('Auswertung',POST_TXT[i.post]+(i.pressure?' Druckempfinden dokumentiert; keine Druckmessung.':'')):'Beckenbewegung beobachten und Ergebnis auswählen.',POST_TXT[i.post]?'':'empty');
-  setLive('hip',m.leadCandidate?R('Vordere Hand','Vergleichsansatz: '+m.leadCandidate.toLowerCase()+'. Hintere Hand separat aus dem Arm-Pendeltest. Stärker/schwächer meint Handstellung, nicht Griffdruck.'):'Dynamischen Test erfassen; der Griffvergleich wird vorgeschlagen.',m.leadCandidate?'':'empty');
+  if(m.gripConflict)setLive('hip',R('Griff uneinheitlich','Hip-Speed-Test und Arm-Pendeltest zeigen für die beiden Hände in entgegengesetzte Richtungen. Es gibt keine automatische Griffänderung; den Griff im Termin am Ballflug prüfen.'),'warn');
+  else setLive('hip',m.leadCandidate?R('Vordere Hand','Vergleichsansatz: '+m.leadCandidate.toLowerCase()+'. Hintere Hand separat aus dem Arm-Pendeltest. Stärker/schwächer meint Handstellung, nicht Griffdruck.'):'Dynamischen Test erfassen; der Griffvergleich wird vorgeschlagen.',m.leadCandidate?'':'empty');
   setLive('compare',R('Dein Vergleichspunkt',m.compareCue.replace(/^Dein Vergleichspunkt: /,'')),m.chosenFocus?'':'empty');
  }
  const c1=$('[data-live="chart1"]'),c2=$('[data-live="chart2"]');
@@ -384,7 +385,7 @@ function reportHTML(r){
    ${r.hasScores?`<table class="score"><thead><tr><th>Einheit / Datum</th><th>Gewohnt</th><th>Vergleich</th><th>Gefühl</th></tr></thead><tbody>
      <tr><td>${r.scores.habit!==null||r.scores.compare!==null?'Im Termin · '+esc(fmtDateLong(r.date)):'1 · ________'}</td><td>${r.scores.habit??'___'} / 5</td><td>${r.scores.compare??'___'} / 5</td><td>${esc({better:'besser',same:'gleich',worse:'schlechter'}[r.scores.feel]||'________')}</td></tr>
      <tr><td>2 · ________</td><td>___ / 5</td><td>___ / 5</td><td>________</td></tr></tbody></table>`:''}
-   ${m.restricted?'':`<div class="tag-line">Alle Befunde nach Klarheit geordnet</div><div class="ranking">${r.ranking.map((x,i)=>`<div class="rank${x.key===m.chosenFocus&&x.available?' on':''}"><span class="rn">${i+1}</span><b>${esc(x.name)}</b><span class="rf">${esc(x.finding)}</span><span class="dots" title="${['kein klarer Ausschlag','leicht','deutlich','sehr deutlich'][x.score]}">${[0,1,2].map(d=>`<i class="${x.score>d?'f':''}"></i>`).join('')}</span></div>`).join('')}</div><p class="tiny muted">Je deutlicher ein Testergebnis vom mittleren Bereich abweicht, desto weiter vorn steht der Punkt. Der Punkt mit der meisten Klarheit ist dein erster Vergleichspunkt; die weiteren sind Themen für die nächsten Termine.</p>`}
+   ${m.restricted?'':`<div class="tag-line">Alle Befunde nach Klarheit geordnet</div><div class="ranking">${r.ranking.map((x,i)=>`<div class="rank${x.key===m.chosenFocus&&x.available?' on':''}"><span class="rn">${i+1}</span><b>${esc(x.name)}</b><span class="rf">${esc(x.finding)}</span><span class="dots" title="${['kein klarer Ausschlag','leicht','deutlich','sehr deutlich'][x.score]}">${[0,1,2].map(d=>`<i class="${x.score>d?'f':''}"></i>`).join('')}</span></div>`).join('')}</div>${m.tieNote?`<p class="small" style="margin:4px 0 6px">${esc(m.tieNote)}</p>`:''}<p class="tiny muted">${esc(RANKING_NOTE)}</p>`}
    <div class="tag-line">Beim nächsten Termin</div><p>${esc(r.next)}</p>
   </div>
   ${m.restricted?'':`
@@ -394,7 +395,7 @@ function reportHTML(r){
    <div class="sec-h"><span class="num">1</span><h2>Dein Bewegungsansatz und Griff</h2></div>
    <div class="cols"><div>
     <div class="tag-line">${esc(r.power?.name||'Noch offen')}</div>
-    <p><b>${esc(r.power?.text||(m.conflict?'Hand- und Dynamiktest passen noch nicht zusammen.':'Ohne eindeutige Testergebnisse wählen wir keinen Bewegungstyp.'))}</b></p>
+    <p><b>${esc(r.power?.text||'Für den Bewegungstyp fehlen noch Tests; ohne mindestens drei Ergebnisse legen wir keinen Typ fest.')}</b></p>
     <p>${esc(m.grip)}</p><p class="muted">${esc(m.bodydetail)}</p></div>
     <div>${bodyKey?photo(bodyKey,{mirror:left&&!!PICTURES[bodyKey].crop}):''}</div></div>
    ${Charts.triad(r.power?.key)}
@@ -409,8 +410,9 @@ function reportHTML(r){
   </div>
   <div class="callout"><b>Wichtig zum Verständnis:</b> Weg und Endposition sind zwei verschiedene Punkte. Der Armtest beschreibt, wie die Arme nach oben geführt werden. Die Spannweite sagt, wie hoch der vordere Arm am obersten Punkt stehen darf. Die Abschwungzone ergibt sich getrennt aus deinen Armmaßen.</div>`}
   ${m.status!=='paused'?`<div class="card"><div class="sec-h"><h2>Deine Übungen</h2></div><p class="muted small">Immer langsam und ohne Druck. Bei Schmerzen sofort beenden.</p>
-   ${r.drills.focus.length?`<div class="tag-line">Für deinen Vergleichspunkt: ${esc(m.focusName)}</div>${r.drills.focus.map(drillCard).join('')}`:''}
-   <div class="tag-line">Grundlagen für jede Einheit</div>${r.drills.basis.filter(Boolean).map(drillCard).join('')}</div>`:''}
+   ${r.drills.main?`<div class="tag-line">Deine Hauptübung · ${esc(m.focusName)}</div>${drillCard(r.drills.main)}`:''}
+   <div class="tag-line">Vor jeder Einheit</div>${r.drills.basis.map(drillCard).join('')}
+   ${r.drills.optional.length?`<details class="optional-drills"><summary>Optional, wenn du mehr Zeit hast (${r.drills.optional.length})</summary>${r.drills.optional.map(drillCard).join('')}</details>`:''}</div>`:''}
   <div class="offer"><small>Dein nächster Schritt</small><div class="offer-h"><div><h2>${esc(r.offer.name)}</h2><p>${r.offer.count} Termine à ${r.offer.minutes} Minuten</p></div><div class="price"><small>${esc(r.offer.priceLabel)}</small><b>${esc(r.offer.priceText)}</b></div></div>
    <div class="offer-s">${r.offer.sessions.map(se=>`<div><small>Termin ${se.n}</small><b>${esc(se.title)}</b><p>${esc(se.text)}</p></div>`).join('')}</div>
    <p class="offer-f">Interesse? Ruf an oder schreib mir per WhatsApp: <a href="tel:+${CONTACT.whatsapp}" style="color:inherit">${esc(CONTACT.phone)}</a> · <a href="https://wa.me/${CONTACT.whatsapp}" target="_blank" rel="noopener" style="color:inherit">WhatsApp öffnen</a> · ${esc(CONTACT.web)}</p></div>

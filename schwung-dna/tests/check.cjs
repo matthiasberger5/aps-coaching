@@ -14,16 +14,31 @@ const rep=(over={},client={name:'Test Kunde',side:'Rechts'})=>{ctx.__o=over;ctx.
 let n=0;const ok=(c,m)=>{assert(c,m);n++;};
 
 // ---- Regeln ----
+// Bewegungstyp nach Adams/Najar: Mehrheit aus Armtest, Post, Hüfte, Spannweite, Armmaßen
 let r=rep({fold:'Side On',span:'164',upper:'38',fore:'34'});
-ok(r.power.key==='spin'&&r.back.plane==='low'&&r.down.plane==='shaft','Side On / niedrig');
+ok(r.power.key==='launch'&&r.back.plane==='low'&&r.down.plane==='shaft','Side On, aber Hüfte Slow + kurze Spannweite + kurzes Armmaß → Launch 3:2');
+ok(/3 von 5 Tests/.test(r.power.text)&&/Arm-Pendeltest allein deutet auf Spin/.test(r.power.text),'Text nennt Mehrheit und abweichenden Armtest');
 r=rep({goal:'Konstanz',miss:'Slice'});ok(r.profileLine==='Dein Ziel: Konstanz  ·  Häufigster Fehlschlag: Slice','Ausgangslage-Zeile');
 r=rep({});ok(r.profileLine==='','Ausgangslage leer');ok(r.video===null,'Video leer = kein Abschnitt');
 r=rep({vidHip:'yes',vidBack:'yes',vidDown:'yes'});ok(r.video&&r.video.items.length===3&&/bestätigt/.test(r.video.summary),'Video bestätigt');
 r=rep({vidHip:'no',vidBack:'part'});ok(r.video.items.length===2&&/weicht ab|Hüfte/.test(r.video.summary)&&/Hüfte/.test(r.video.summary),'Video weicht ab');
-r=rep({fold:'On Top',span:'176',upper:'38',fore:'42'});ok(r.power.key==='launch'&&r.back.plane==='high'&&r.down.plane==='shoulder','On Top / hoch');
-r=rep({fold:'Side/Under',span:'170',fore:'35'});ok(r.power.key==='glide'&&r.back.plane==='mid'&&r.down.plane==='elbow','Under / gleich');
-r=rep({span:'170.5',fore:'35.5'});ok(r.back.plane===null&&r.down.plane===null&&r.model.gaps.includes('Armmaße erneut messen'),'kleine Differenz bleibt offen');
-r=rep({fold:'Uneindeutig'});ok(r.power===null,'uneindeutiger Armtest');
+r=rep({fold:'On Top',span:'176',upper:'38',fore:'42'});ok(r.power.key==='mixed'&&!r.power.feel&&r.back.plane==='high'&&r.down.plane==='shoulder','Gleichstand Glide/Launch → Mischform, keine Bewegungsaufgabe');
+ok(!r.ranking.find(x=>x.key==='motion').available,'Mischform ist kein Vergleichspunkt');
+r=rep({fold:'Side/Under',span:'170',fore:'35'});ok(r.power.key==='spin'&&r.back.plane==='mid'&&r.down.plane==='elbow','Under, aber Center + gleiche Maße → Spin');
+r=rep({span:'171.5',fore:'36.5'});ok(r.back.plane==='mid'&&r.down.plane==='elbow','Differenz bis 2 cm = nahezu gleich → Mitte');
+r=rep({span:'172.5',fore:'37.5'});ok(r.back.plane==='high'&&r.down.plane==='shoulder','Differenz über 2 cm → eingeordnet');
+r=rep({fold:'Uneindeutig'});ok(r.model.armback===null&&r.power.key==='glide','uneindeutiger Armtest: Typ aus den übrigen vier Tests');
+r=rep({fold:'',post:'',hip:''});ok(r.power===null,'unter drei Tests kein Bewegungstyp');
+// Griff: vordere Hand aus Hüfttempo, hintere aus Armtest; Gegenrichtung = keine Änderung
+r=rep({fold:'On Top',hip:'Fast'});ok(r.model.gripConflict&&r.model.leadCandidate===null&&!r.ranking.find(x=>x.key==='grip').available&&/entgegengesetzte/.test(r.model.grip),'Hüfte stärker + Hand schwächer → keine Griffänderung');
+ok(r.gripPicture===null,'bei Widerspruch kein Griff-Foto');
+r=rep({fold:'Side/Under',hip:'Slow'});ok(r.model.gripConflict,'Hüfte schwächer + Hand stärker → Widerspruch');
+r=rep({fold:'On Top',hip:'Slow'});ok(!r.model.gripConflict&&r.ranking.find(x=>x.key==='grip').score===3,'gleiche Richtung → Griff sehr deutlich');
+r=rep({fold:'Side On',hip:'Fast'});ok(!r.model.gripConflict&&r.ranking.find(x=>x.key==='grip').score===2,'neutrale hintere Hand → Griff deutlich');
+r=rep({fold:'On Top',hip:'Fast',leadgrip:'Stärker'});ok(!r.model.gripConflict&&r.model.leadCandidate==='Stärker','am Ball bestätigter Griff hebt Sperre auf');
+ok(/Ziel sind etwa drei bis dreieinhalb Knöchel/.test(rep({fold:'Side On',hip:'Fast',focus:'grip'}).model.compareCue)&&/bleibt dein Griff, wie er ist/.test(rep({fold:'Side On',hip:'Fast',focus:'grip'}).model.compareCue),'Griffanweisung mit Zielwert und ohne Änderung, wenn schon erreicht');
+// Kleinschreibung nur am Anfang
+r=rep({fold:'On Top',span:'176'});ok(r.ranking.find(x=>x.key==='back').finding.includes('Führung: eher höhere Führung'),'Nomen bleibt großgeschrieben');
 r=rep({pain:'Bewegung eingeschränkt'});ok(r.model.status==='paused'&&r.power===null&&r.back===null&&r.bodyPicture===null,'Beschwerden pausieren');
 ok(r.offer.sessions[0].title==='Beschwerdefrei starten'&&r.offer.sessions.length===3,'Angebot bei Beschwerden');
 r=rep({hip:'Slow',leadgrip:''});ok(r.model.leadCandidate==='Schwächer'&&r.model.grip.includes('schwächeren'),'Slow → schwächer');
@@ -52,7 +67,11 @@ run('DRILLS').forEach(d=>{ok(d.id&&d.title&&d.goal&&d.steps.length>=2&&d.watch&&
 
 // ---- Reihenfolge nach Klarheit ----
 r=rep({fold:'On Top',post:'Rear',hip:'Fast',height:'170',span:'176',upper:'35',fore:'40'});
-ok(r.model.chosenFocus==='motion'&&r.ranking[0].key==='motion','Beispiel Anna: Körperbewegung zuerst, nicht Griff');
+ok(r.power.key==='glide'&&r.model.gripConflict,'Beispiel Anna: Glide 3 von 5 (nicht Launch), Griff widersprüchlich');
+ok(r.model.chosenFocus==='motion'&&r.ranking[0].key==='motion'&&/Gleich deutlich/.test(r.model.tieNote),'Beispiel Anna: Gleichstand wird benannt, Körperbewegung zuerst');
+r=rep({fold:'Side On',post:'Center',hip:'Fast',height:'170',span:'170',upper:'35',fore:'35'});ok(r.power.key==='spin'&&r.ranking.find(x=>x.key==='motion').score===1,'Spin (mittlerer Typ) höchstens 1 Punkt');
+r=rep({fold:'On Top',post:'Front',hip:'Slow',height:'170',span:'164',upper:'38',fore:'34'});ok(r.power.key==='launch'&&r.ranking.find(x=>x.key==='motion').score===3,'5 von 5 Launch → sehr deutlich');
+r=rep({fold:'On Top',post:'Rear',hip:'Fast',height:'170',span:'176',upper:'35',fore:'40'});
 ok(r.ranking.length===4&&r.ranking.every(x=>x.score>=0&&x.score<=3),'Ranking vollständig');
 ok(r.focusWhy.length>20&&r.finding.includes('Körperbewegung'),'klare Aussage zum Vergleichspunkt');
 r=rep({fold:'Side On',post:'Center',hip:'Mid',height:'170',span:'180',upper:'35',fore:'36.5'});ok(r.model.chosenFocus==='back','große Spannweitendifferenz → Rückschwung');
@@ -60,6 +79,13 @@ r=rep({fold:'Side On',post:'Center',hip:'Mid',height:'170',span:'171.5',upper:'3
 r=rep({fold:'Side On',post:'Center',hip:'Fast',height:'170',span:'171.5',upper:'35',fore:'36.5'});ok(r.model.chosenFocus==='grip','Hip Fast bei sonst neutralen Tests → Griff');
 r=rep({fold:'Side On',post:'Center',hip:'Fast',focus:'down',height:'170',span:'171.5',upper:'35',fore:'41'});ok(r.model.chosenFocus==='down','Auswahl des Trainers hat Vorrang');
 r=rep({});ok(r.offer.priceText==='199 €'&&r.offer.minutes===50&&r.offer.count===3,'Angebot 3 × 50 Min. für 199 €');
+ok(r.offer.validUntil==='2026-11-21'&&r.offer.priceLabel==='Sonderpreis bis 21.11.2026','Sonderpreis gilt Check-Datum + 1 Monat');
+ok(run('addOneMonth("2026-01-31")')==='2026-02-28'&&run('addOneMonth("2026-12-15")')==='2027-01-15'&&run('addOneMonth("2028-01-31")')==='2028-02-29','Monatsende und Jahreswechsel');
+// Übungen: eine Hauptübung, höchstens zwei optionale, einheitlich Eisen 7
+r=rep({fold:'On Top',post:'Front',hip:'Slow',height:'170',span:'164',upper:'38',fore:'34'});
+ok(r.drills.main&&r.drills.optional.length<=2&&r.drills.basis.length===1&&r.drills.basis[0].id==='basis-warmup','Vergleichspunkt: Hauptübung + Warm-up + max. 2 optional');
+ok(rep({fold:'',post:'',hip:'',span:'',fore:''}).drills.basis.some(d=>d.id==='basis-baseline'),'ohne Vergleichspunkt: Ausgangswert festhalten');
+ok(!JSON.stringify(run('DRILLS')).includes('Eisen 8'),'keine Übung mit Eisen 8');
 ok(run('Charts.levels("top","high")').indexOf('Tief')<run('Charts.levels("top","high")').indexOf('Hoch'),'Ebenen von Tief nach Hoch');
 ok(run('Charts.levels("down","shaft")').indexOf('Hüftnah')<run('Charts.levels("down","shaft")').indexOf('Schulternah'),'Zonen von Hüftnah nach Schulternah');
 

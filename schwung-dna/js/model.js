@@ -23,6 +23,8 @@ const PICTURES={
 const CREDITS='Bildquellen: E.A. Tischler / New Horizons Golf Approach (newhorizonsgolf.com) · Griff-Foto: HackMotion (hackmotion.com).';
 // Hinweis für Kunden; erscheint am Ende von Bericht und PDF.
 const DISCLAIMER='Dieser Bericht beschreibt Trainingsansätze aus einem Coaching-Screening. Er ist keine medizinische Untersuchung und ersetzt keine ärztliche oder physiotherapeutische Beratung. Alle Ansätze sind Vorschläge zum Ausprobieren; entscheidend ist der Vergleich am Ball. Bei Schmerzen oder Beschwerden die Übung sofort beenden und ärztlichen Rat einholen.';
+// Erklärung der Rangfolge für Bericht und PDF
+const RANKING_NOTE='Die Punkte zeigen, wie eindeutig ein Befund ist: bei der Körperbewegung, wie klar die Mehrheit deiner fünf Tests ist; beim Griff, ob Hüfttempo und hintere Hand in dieselbe Richtung zeigen; bei Rückschwung und Abschwung, wie deutlich deine Maße vom Gleichstand abweichen. Der klarste Punkt ist dein erster Vergleichspunkt; die weiteren sind Themen für die nächsten Termine.';
 // Kontakt zentral pflegen (Bericht, PDF, E-Mail).
 const CONTACT={name:'Matthias Berger · Golf Professional',phone:'0171 9045523',whatsapp:'491719045523',web:'www.matthiasberger.pro'};
 const CONTACT_LINE='Telefon und WhatsApp '+CONTACT.phone+' · '+CONTACT.web;
@@ -36,17 +38,25 @@ const HIP_LABEL={Slow:'Slow',Mid:'Mid',Fast:'Fast'};
 const TOP_LABEL={low:'Tiefer Top',mid:'Mittlerer Top',high:'Hoher Top'};
 const DOWN_LABEL={shaft:'Hüftnah',elbow:'Rumpfnah',shoulder:'Schulternah'};
 
+// Eine Hauptübung, höchstens zwei optionale Ergänzungen und das Warm-up.
+// Der 5+5-Vergleich steckt bereits in der Aufgabe; der Ausgangswert nur, solange noch kein Vergleichspunkt feststeht.
 function drillsForReport(model,inp){
- const out={};
- const k=model.chosenFocus;
- if(k==='motion'&&model.power?.key&&['glide','spin','launch'].includes(model.power.key))out.focus=[...drillsFor('motion',model.power.key),...drillsFor('post',inp.post)];
- else if(k==='grip'&&model.leadCandidate)out.focus=[...drillsFor('grip',model.leadCandidate),...drillsFor('hip',inp.hip)];
- else if(k==='back'){out.focus=[...drillsFor('back',model.armback?.plane),...drillsFor('top',model.back?.plane)].filter(Boolean);}
- else if(k==='down'&&model.down?.plane)out.focus=drillsFor('down',model.down.plane);
- else out.focus=[];
- out.focus=out.focus.slice(0,4);
- out.basis=['basis-baseline','basis-compare','basis-warmup'].map(drillById);
- return out;
+ if(model.status==='paused')return {main:null,optional:[],focus:[],basis:[]};
+ const k=model.chosenFocus;let core=[],extra=[];
+ if(k==='motion'&&['glide','spin','launch'].includes(model.power?.key)){core=drillsFor('motion',model.power.key);extra=drillsFor('post',inp.post);}
+ else if(k==='grip'&&model.leadCandidate){core=drillsFor('grip',model.leadCandidate);extra=drillsFor('hip',inp.hip);}
+ else if(k==='back'){core=[...drillsFor('back',model.armback?.plane),...drillsFor('top',model.back?.plane)];}
+ else if(k==='down'&&model.down?.plane)core=drillsFor('down',model.down.plane);
+ const list=[...core,...extra].filter(Boolean);
+ const focusMode=['compare','favorable'].includes(model.status);
+ return {main:list[0]||null,optional:list.slice(1,3),focus:list.slice(0,3),
+  basis:[focusMode?null:drillById('basis-baseline'),drillById('basis-warmup')].filter(Boolean)};
+}
+// Datum + 1 Monat (bei kürzerem Folgemonat der letzte Tag, z. B. 31.01. → 28./29.02.)
+function addOneMonth(iso){
+ const [y,m,d]=(iso||localDate()).split('-').map(Number);
+ const next=new Date(y,m,1),last=new Date(y,m+1,0).getDate();
+ return [next.getFullYear(),String(next.getMonth()+1).padStart(2,'0'),String(Math.min(d,last)).padStart(2,'0')].join('-');
 }
 
 const GOALS=['Länge','Konstanz','Schmerzfrei spielen','Mehr Kontrolle'];
@@ -70,7 +80,8 @@ function videoBlock(model,inp,restricted){
 }
 // Angebot nach dem Screening. Preis, Anzahl und Dauer hier zentral pflegen.
 const OFFER={name:'Festigungs-Paket',count:3,minutes:50,price:199,currency:'€',priceLabel:'Sonderpreis'};
-function buildOffer(model){
+function buildOffer(model,date){
+ const validUntil=addOneMonth(date);
  const pts=(model.ranking||[]).filter(x=>x.available).slice(0,OFFER.count);
  const paused=model.status==='paused',off=paused?1:0,sessions=[];
  for(let i=0;i<OFFER.count;i++){
@@ -81,7 +92,7 @@ function buildOffer(model){
   else{title='Zusammenführen';text='Übernommene Punkte verbinden und auf die Runde übertragen.';}
   sessions.push({n:i+1,title,text});
  }
- return {name:OFFER.name,count:OFFER.count,minutes:OFFER.minutes,price:OFFER.price,currency:OFFER.currency,priceLabel:OFFER.priceLabel,priceText:OFFER.price+' '+OFFER.currency,sessions};
+ return {name:OFFER.name,count:OFFER.count,minutes:OFFER.minutes,price:OFFER.price,currency:OFFER.currency,validUntil,priceLabel:OFFER.priceLabel+' bis '+fmtDate(validUntil),priceText:OFFER.price+' '+OFFER.currency,sessions};
 }
 
 function buildReport(inp,client={}){
@@ -95,7 +106,7 @@ function buildReport(inp,client={}){
  const gripPicture=restricted?null:({'Schwächer':'gripweak','Neutral':'gripneutral','Stärker':'gripstrong'}[model.leadCandidate]||null);
  const bodyPicture=restricted?null:({'Side/Under':'under','Side On':'sideon','On Top':'ontop'}[inp.fold]||null);
  const drills=drillsForReport(model,inp);
- const offer=buildOffer(model);
+ const offer=buildOffer(model,inp.date);
  const done=[!!model.armback,complete&&!!model.back?.plane&&!!model.down?.plane,['Front','Center','Rear'].includes(inp.post),['Slow','Mid','Fast'].includes(inp.hip)];
  const hh=inp.hitsHabit===''?null:Number(inp.hitsHabit),hc=inp.hitsCompare===''?null:Number(inp.hitsCompare);
  let scoreVerdict=null;
@@ -126,7 +137,7 @@ function buildReport(inp,client={}){
 function testOverview(r){
  const i=r.inputs||{},m=r.model,mm=r.measures||{};
  const FOLD={'Side/Under':'Handfläche eher nach oben','Side On':'Handfläche eher seitlich','On Top':'Handfläche eher zum Boden',Uneindeutig:'uneindeutig'};
- const POST={Front:'Becken eher vorn',Center:'Becken eher mittig',Rear:'Becken eher hinten',Unclear:'uneindeutig'};
+ const POST={Front:'Gewicht eher vorn',Center:'Gewicht eher mittig',Rear:'Gewicht eher hinten',Unclear:'uneindeutig'};
  const PRES={front:'Druck vorn',center:'Druck beidseitig',rear:'Druck hinten',unclear:'Druck unklar'};
  const HIP={Slow:'Ferse am Boden, Hüfte zurück',Mid:'Ferse leicht angehoben',Fast:'Ferse deutlich angehoben, Hüfte voraus',Unclear:'uneindeutig'};
  const has=(...v)=>v.every(x=>x>0);
@@ -135,6 +146,6 @@ function testOverview(r){
   {test:'Größe und Spannweite',seen:has(mm.height,mm.span)?fmt(mm.height)+' cm / '+fmt(mm.span)+' cm':'noch offen',result:r.back?.name||'offen'},
   {test:'Oberarm und Armmaß',seen:has(mm.upper,mm.fore)?fmt(mm.upper)+' cm / '+fmt(mm.fore)+' cm':'noch offen',result:r.down?.name||'offen'},
   {test:'Post-/Pivot-Test',seen:(POST[i.post]||'noch offen')+(i.pressure&&PRES[i.pressure]?' · '+PRES[i.pressure]:''),result:POST_LABEL[i.post]||'offen'},
-  {test:'Hip-Speed-Test',seen:HIP[i.hip]||'noch offen',result:m.leadCandidate?'Vordere Hand: '+m.leadCandidate.toLowerCase()+' prüfen':(HIP_LABEL[i.hip]||'offen')}
+  {test:'Hip-Speed-Test',seen:HIP[i.hip]||'noch offen',result:m.gripConflict?HIP_LABEL[i.hip]+' · Griff uneinheitlich, keine Änderung':m.leadCandidate?'Vordere Hand: '+m.leadCandidate.toLowerCase()+' prüfen':(HIP_LABEL[i.hip]||'offen')}
  ];
 }
