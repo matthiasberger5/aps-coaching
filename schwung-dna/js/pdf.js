@@ -368,7 +368,7 @@ async function createReportPDF(r,opts={}){
    let ty=ty0-30;wrap(se.title,'b',11.5,tw2).forEach(ln=>{page.drawText(ln,{x:x+12,y:ty-11,size:11.5,font:F.b,color:hex(C.white)});ty-=14;});ty-=4;
    textAt(se.text,x+12,ty,{s:8.6,w:tw2,lh:1.4,color:C.mint2});
   });
-  textAt('Interesse? Sprich mich gern direkt an: www.matthiasberger.pro',M+24,top-hh+40,{s:10,color:C.white,w:CW-48,f:'b'});
+  textAt('Interesse? Ruf an oder schreib mir per WhatsApp: '+CONTACT.phone+'  ·  '+CONTACT.web,M+24,top-hh+40,{s:10,color:C.white,w:CW-48,f:'b'});
   y-=hh+16;
  }
 
@@ -378,8 +378,12 @@ async function createReportPDF(r,opts={}){
  for(let i=0;i<6;i++){need(24);line(M,y-18,W-M,y-18,'#cfd6cc',0.7);y-=24;}
  y-=14;
  need(50);
- page.drawText('Matthias Berger · Golf Professional',{x:M,y:y-12,size:12,font:F.b,color:hex(C.green)});
- page.drawText('www.matthiasberger.pro',{x:M,y:y-27,size:10,font:F.r,color:hex(C.muted)});
+ page.drawText(clean(CONTACT.name),{x:M,y:y-12,size:12,font:F.b,color:hex(C.green)});
+ page.drawText(clean(CONTACT_LINE),{x:M,y:y-27,size:10,font:F.r,color:hex(C.muted)});
+ y-=46;
+ // Hinweis für Kunden und Bildnachweis
+ callout(DISCLAIMER,{fill:C.goldbg,bar:C.gold,label:'WICHTIGER HINWEIS',s:9.2});
+ if(Object.keys(img).length)para(CREDITS,{s:7.6,color:C.faint,gap:0});
 
  // ================= Kopf- und Fußzeilen =================
  const n=pages.length;
@@ -391,7 +395,7 @@ async function createReportPDF(r,opts={}){
    line(M,H-48,W-M,H-48,C.line,0.7);
   }
   line(M,44,W-M,44,C.line,0.7);
-  pg.drawText('Matthias Berger · Golf Professional · www.matthiasberger.pro',{x:M,y:30,size:7.8,font:F.r,color:hex(C.faint)});
+  pg.drawText(clean(CONTACT.name+' · '+CONTACT.phone+' · '+CONTACT.web),{x:M,y:30,size:7.8,font:F.r,color:hex(C.faint)});
   const pn='Seite '+(i+1)+' / '+n;pg.drawText(pn,{x:W-M-width(pn,'r',7.8),y:30,size:7.8,font:F.r,color:hex(C.faint)});
  });
  return await doc.save();

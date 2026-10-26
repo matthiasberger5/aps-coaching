@@ -18,8 +18,15 @@ const PICTURES={
  elbow:{src:'assets/new-horizons/slotting_-cross_RDL_2-405x217.png',width:405,height:217,caption:'Rumpfnahe Zone: Hände und Schläger werden im mittleren Bereich zum Ball geführt. Modellbereich: Nabel bis unteres Brustbein.'},
  shoulder:{src:'assets/new-horizons/slotting_-shoulder_RDL_2-405x226.png',width:405,height:226,caption:'Schulternahe Zone: Hände und Schläger werden im höheren Bereich zum Ball geführt. Modellbereich: unteres Brustbein bis Schädelansatz.'}
 };
-const CREDITS='Bilder: E.A. Tischler / New Horizons Golf Approach (newhorizonsgolf.com), Griff-Foto: HackMotion (hackmotion.com). Eine Freigabe zur kommerziellen Weitergabe wurde nicht festgestellt.';
-const DISCLAIMER='Vorläufiges Coaching-Modell auf Basis öffentlich zugänglicher Lehrbeispiele. Keine bestätigte Berechnung des einzig richtigen Schwungs und keine vollständige Umsetzung einer offiziellen Zertifizierungsunterlage. Bei Beschwerden Bewegung beenden und ärztlichen Rat einholen.';
+// Bildnachweis für Bericht und PDF. ACHTUNG: Nutzungsrecht für die kommerzielle Weitergabe vor dem Einsatz klären
+// oder die Bilder durch eigene ersetzen (PICTURES oben). Ein Nachweis allein ersetzt keine Erlaubnis.
+const CREDITS='Bildquellen: E.A. Tischler / New Horizons Golf Approach (newhorizonsgolf.com) · Griff-Foto: HackMotion (hackmotion.com).';
+// Hinweis für Kunden; erscheint am Ende von Bericht und PDF.
+const DISCLAIMER='Dieser Bericht beschreibt Trainingsansätze aus einem Coaching-Screening. Er ist keine medizinische Untersuchung und ersetzt keine ärztliche oder physiotherapeutische Beratung. Alle Ansätze sind Vorschläge zum Ausprobieren; entscheidend ist der Vergleich am Ball. Bei Schmerzen oder Beschwerden die Übung sofort beenden und ärztlichen Rat einholen.';
+// Kontakt zentral pflegen (Bericht, PDF, E-Mail).
+const CONTACT={name:'Matthias Berger · Golf Professional',phone:'0171 9045523',whatsapp:'491719045523',web:'www.matthiasberger.pro'};
+const CONTACT_LINE='Telefon und WhatsApp '+CONTACT.phone+' · '+CONTACT.web;
+const firstName=n=>(n||'').trim().split(/\s+/)[0]||'';
 
 const FOCUS_NAMES={motion:'Körperbewegung',grip:'Griffansatz',back:'Rückschwungführung',down:'Abschwungzone'};
 const POWER_KEY={'Side/Under':'glide','Side On':'spin','On Top':'launch'};

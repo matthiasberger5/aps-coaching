@@ -228,3 +228,8 @@ dialog{border:0;border-radius:20px;padding:26px;max-width:460px;width:calc(100% 
   .drill,.week,.photo{break-inside:avoid}
   .cols{grid-template-columns:1fr 1fr}
 }
+/* Einwilligung im Profil-Schritt */
+.field>label.consent{display:flex;gap:12px;align-items:flex-start;font-size:14px;font-weight:400;color:var(--ink,#17261f);background:var(--goldbg);border-radius:12px;padding:12px 14px;margin:0;cursor:pointer}
+.field>label.consent input{width:22px;height:22px;flex:0 0 auto;margin:1px 0 0;accent-color:#1f4a37}
+.field>label.consent b{display:block;margin-bottom:2px}
+#consentbox.attention>label.consent{outline:2px solid var(--warn,#a3501f);outline-offset:2px}

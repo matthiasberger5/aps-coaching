@@ -74,6 +74,17 @@ const imp=run(`Store.importJSON(${JSON.stringify(exp)})`);ok(imp.clients===1&&im
 const imp2=run(`Store.importJSON(${JSON.stringify(exp)})`);ok(imp2.clients===0&&imp2.sessions===0,'Import doppelt ohne Duplikate');
 assert.throws(()=>run('Store.importJSON("{\\"x\\":1}")'),/Schwung-DNA/);n++;
 run(`Store.saveSession("${s.id}",{...DEFAULT_INPUTS(),height:"185"})`);ok(run(`Store.session("${s.id}").inputs.height`)==='185','Session ändern');
+// Import übernimmt neueren Stand eines vorhandenen Checks
+{const newer=JSON.parse(run('Store.exportJSON()'));newer.sessions[0].inputs.height='190';newer.sessions[0].updated='2999-01-01T00:00:00.000Z';
+ const r2=run(`Store.importJSON(${JSON.stringify(JSON.stringify(newer))})`);ok(r2.updated===1&&run(`Store.session("${s.id}").inputs.height`)==='190','Import aktualisiert neueren Stand');
+ const older=JSON.parse(run('Store.exportJSON()'));older.sessions[0].inputs.height='150';older.sessions[0].updated='2000-01-01T00:00:00.000Z';
+ run(`Store.importJSON(${JSON.stringify(JSON.stringify(older))})`);ok(run(`Store.session("${s.id}").inputs.height`)==='190','Import überschreibt nicht mit älterem Stand');
+ const bad={clients:[{id:'"><img>',created:'x'}],sessions:[]};const r3=run(`Store.importJSON(${JSON.stringify(JSON.stringify(bad))})`);ok(r3.skipped===1&&r3.clients===0,'Import verwirft unsichere IDs');}
+// Leere Neuanlagen werden entfernt, Kunden mit Daten bleiben
+{const e=run('Store.saveClient({name:"",side:"Rechts",email:""})');run(`Store.newSession("${e.id}",DEFAULT_INPUTS())`);
+ const k=run('Store.saveClient({name:"",side:"Rechts",email:""})');run(`Store.newSession("${k.id}",{...DEFAULT_INPUTS(),fold:"On Top"})`);
+ ok(run('Store.purgeEmpty()')===1&&!run(`Store.client("${e.id}")`)&&!!run(`Store.client("${k.id}")`),'Leere Neuanlage entfernt, Kunde mit Testdaten bleibt');
+ run(`Store.deleteClient("${k.id}")`);}
 run(`Store.deleteClient("${c.id}")`);ok(run('Store.counts().sessions')===0,'Kunde löschen entfernt Checks');
 
 // ---- Grafiken ----

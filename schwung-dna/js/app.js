@@ -55,7 +55,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('#timer');if(!t)r
 function go(hash){if(location.hash===hash)route();else location.hash=hash;}
 window.addEventListener('hashchange',route);
 function route(){
- flushSave();app.onclick=null;app.oninput=null;$('#savestate').hidden=true;
+ flushSave();app.onclick=null;app.oninput=null;app.onchange=null;$('#savestate').hidden=true;
  const p=location.hash.replace(/^#\/?/,'').split('/');
  window.scrollTo(0,0);
  $('#timerslot').innerHTML='';
@@ -68,9 +68,17 @@ function route(){
 }
 
 // ---------- Startseite ----------
+const isInstalled=()=>{try{return window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}catch(e){return false;}};
+function backupInfo(cnt){
+ const lb=Store.lastBackup(),days=lb?Math.floor((Date.now()-Date.parse(lb))/864e5):null;
+ const text=lb?'Letzte Sicherung: '+fmtDateLong(lb.slice(0,10))+(days>0?' (vor '+days+' Tag'+(days===1?'':'en')+')':' (heute)'):'Noch keine Sicherung erstellt.';
+ const warn=cnt.sessions>0&&(days===null||days>=7);
+ return {text,warn,days};
+}
 function viewHome(){
  S.sessionId=null;S.inputs=null;
- const clients=Store.clients(),cnt=Store.counts();
+ Store.purgeEmpty();
+ const clients=Store.clients(),cnt=Store.counts(),bk=backupInfo(cnt);
  app.innerHTML=`
  <section class="hero">
   <div class="eyebrow">Matthias Berger · Golf Professional</div>
@@ -80,6 +88,8 @@ function viewHome(){
  </section>
  <div class="stats"><div class="stat"><b>${cnt.clients}</b><span>Kunden</span></div><div class="stat"><b>${cnt.sessions}</b><span>Checks</span></div><div class="stat"><b>${clients.length?esc(fmtDateLong(Store.lastDate(clients[0].id))||'–'):'–'}</b><span>Letzter Check</span></div></div>
  ${Store.persistent?'':'<div class="banner">Dein Browser erlaubt kein dauerhaftes Speichern (z. B. privates Fenster). Daten gehen beim Schließen verloren. Bitte PDF direkt sichern.</div>'}
+ ${Store.persistent&&!isInstalled()?'<div class="banner">Bitte die App über Teilen → „Zum Home-Bildschirm“ installieren und von dort öffnen. Im normalen Safari-Tab löscht Safari gespeicherte Kunden, wenn die Seite 7 Tage nicht geöffnet wurde.</div>':''}
+ ${bk.warn?`<div class="banner">${esc(bk.text)} Bitte unten „Sicherung herunterladen“ nutzen.</div>`:''}
  <div class="card">
   <div class="row between" style="margin-bottom:12px"><h2>Kunden</h2><input type="search" id="q" placeholder="Suchen …" style="max-width:240px" ${clients.length?'':'hidden'}></div>
   <div class="clist" id="clist">${clients.length?clients.map(clientRow).join(''):'<div class="empty-state"><b>Noch keine Kunden</b><p class="small">Starte oben deinen ersten Check. Kunden und Ergebnisse werden automatisch auf diesem Gerät gespeichert.</p></div>'}</div>
@@ -87,13 +97,14 @@ function viewHome(){
  <div class="card flat">
   <h3>Daten sichern</h3>
   <p class="small muted">Alle Kundendaten liegen nur in diesem Browser auf diesem Gerät, nicht auf einem Server. Sichere sie regelmäßig als Datei und bewahre sie geschützt auf. Beim Löschen der Safari-Website-Daten gehen sie verloren.</p>
+  <p class="small"><b>${esc(bk.text)}</b></p>
   <div class="row"><button class="btn secondary small" id="export">Sicherung herunterladen</button><label class="btn secondary small" style="cursor:pointer">Sicherung einlesen<input type="file" id="import" accept="application/json,.json" hidden></label><button class="btn danger small" id="wipe" ${cnt.clients?'':'disabled'}>Alle Daten löschen</button></div>
  </div>`;
  $('#newcheck').onclick=()=>startCheck();
  $('#clist').onclick=e=>{const b=e.target.closest('[data-client]');if(b)go('#/client/'+b.dataset.client);};
  $('#q').oninput=e=>{const q=e.target.value.toLowerCase();$$('.client',app).forEach(c=>c.hidden=!c.dataset.name.includes(q));};
- $('#export').onclick=()=>{downloadBytes(new TextEncoder().encode(Store.exportJSON()),'Schwung-DNA_Sicherung_'+localDate()+'.json','application/json');toast('Sicherung erstellt');};
- $('#import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const res=Store.importJSON(await f.text());toast(res.clients+' Kunden, '+res.sessions+' Checks übernommen');viewHome();}catch(err){toast('Fehler: '+err.message,4000);}};
+ $('#export').onclick=async()=>{try{await downloadBytes(new TextEncoder().encode(Store.exportJSON()),'Schwung-DNA_Sicherung_'+localDate()+'.json','application/json');Store.markBackup();viewHome();toast('Sicherung erstellt');}catch(err){toast('Sicherung fehlgeschlagen: '+err.message,4000);}};
+ $('#import').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const res=Store.importJSON(await f.text());toast(res.clients+' Kunden und '+res.sessions+' Checks neu'+(res.updated?', '+res.updated+' aktualisiert':'')+(res.skipped?', '+res.skipped+' fehlerhafte Einträge übersprungen':''),4000);viewHome();}catch(err){toast('Fehler: '+err.message,4000);}};
  $('#wipe').onclick=async()=>{if(await ask('Alle Daten löschen?','Sämtliche Kunden und Checks auf diesem Gerät werden entfernt. Vorher bitte eine Sicherung herunterladen.','Alles löschen')){Store.wipe();viewHome();}};
 }
 function clientRow(c){
@@ -119,12 +130,13 @@ function viewClient(id){
  app.innerHTML=`
  <p><button class="btn ghost small" id="back">‹ Alle Kunden</button></p>
  <div class="card">
-  <div class="row" style="gap:16px;margin-bottom:14px"><div class="avatar" style="width:56px;height:56px;font-size:18px">${esc(initials(c.name))}</div><div style="flex:1"><div class="eyebrow">Kunde</div><h1 style="font-size:28px">${esc(clientName(c))}</h1></div><button class="btn" id="new">Neuer Check</button></div>
+  <div class="row" style="gap:16px;margin-bottom:14px"><div class="avatar" id="cav" style="width:56px;height:56px;font-size:18px">${esc(initials(c.name))}</div><div style="flex:1"><div class="eyebrow">Kunde</div><h1 style="font-size:28px" id="ctitle">${esc(clientName(c))}</h1></div><button class="btn" id="new">Neuer Check</button></div>
   <div class="grid3">
    <div class="field"><label for="cn">Name</label><input type="text" id="cn" value="${esc(c.name||'')}" autocomplete="off"></div>
    <div class="field"><label>Spielseite</label><div class="seg" id="cs">${['Rechts','Links'].map(v=>`<button aria-pressed="${(c.side||'Rechts')===v}" data-v="${v}">${v}</button>`).join('')}</div></div>
    <div class="field"><label for="ce">E-Mail (manueller Versand)</label><input type="email" id="ce" value="${esc(c.email||'')}" autocomplete="off"></div>
   </div>
+  <p class="small">${c.consent?`<span class="chip">Einwilligung vom ${esc(fmtDateLong(c.consent.slice(0,10)))}</span>`:'<span class="chip warn">Keine Einwilligung erfasst · wird beim nächsten Check abgefragt</span>'}</p>
  </div>
  ${last?`<div class="card"><h2>Aktueller Stand</h2><p class="lead">${esc(buildReport(last.inputs,c).priority)}</p>${dnaChips(buildReport(last.inputs,c))}</div>`:''}
  <div class="card"><h2>Verlauf der Schlagvergleiche</h2><p class="small muted">Saubere Treffer von fünf Bällen: gewohnt gegen Vergleich, pro Check.</p>${Charts.progress(pts)}</div>
@@ -132,7 +144,7 @@ function viewClient(id){
  <p><button class="btn danger small" id="delc">Kunden und alle Checks löschen</button></p>`;
  $('#back').onclick=()=>go('#/');
  $('#new').onclick=()=>startCheck(id);
- $('#cn').oninput=e=>Store.saveClient({id,name:e.target.value});
+ $('#cn').oninput=e=>{const v=e.target.value;Store.saveClient({id,name:v});$('#ctitle').textContent=v.trim()||'Kunde ohne Namen';$('#cav').textContent=initials(v);};
  $('#ce').oninput=e=>Store.saveClient({id,email:e.target.value});
  $('#cs').onclick=e=>{const b=e.target.closest('button');if(!b)return;Store.saveClient({id,side:b.dataset.v});$$('#cs button').forEach(x=>x.setAttribute('aria-pressed',x===b));};
  app.onclick=async e=>{
@@ -163,6 +175,7 @@ const STEP_VIEW=[
    <div class="field"><label>Spielseite</label><div class="seg" id="side">${['Rechts','Links'].map(v=>`<button type="button" data-client-side="${v}" aria-pressed="${(c.side||'Rechts')===v}">${v}</button>`).join('')}</div><p class="hint">Bei Linksspielern gelten vordere/hintere Hand entsprechend; das Griff-Foto wird gespiegelt.</p></div>
    <div class="field"><label for="f_email">E-Mail (manueller Versand)</label><input type="email" id="f_email" data-client="email" value="${esc(c.email||'')}" autocomplete="off"></div>
   </div>
+  <div class="field" id="consentbox"><label class="consent" for="f_consent"><input type="checkbox" id="f_consent" ${c.consent?'checked':''}><span><b>Einwilligung liegt vor</b>Der Kunde ist einverstanden, dass Name, E-Mail, Beschwerden und Testergebnisse für das Coaching auf diesem Gerät gespeichert werden. Pflicht vor dem ersten Test.</span></label>${c.consent?`<p class="hint">Bestätigt am ${esc(fmtDateLong(c.consent.slice(0,10)))}.</p>`:''}</div>
   <div class="field"><label>Beschwerden</label><div class="choices c3">
    ${choice('pain','Keine angegeben','Keine Beschwerden','Alle Tests wie geplant','')}
    ${choice('pain','Bewegung eingeschränkt','Eingeschränkt','Bewegung nur begrenzt möglich','')}
@@ -232,7 +245,7 @@ STEP_VIEW.push(()=>{
 
 function stepDone(i,inp=S.inputs){
  const c=Store.client(S.clientId);
- return [!!c?.name?.trim(),!!inp.fold,['height','span','upper','fore'].every(k=>Number(inp[k])>0),!!inp.post,!!inp.hip,!!inp.trial,!!(inp.vidHip||inp.vidBack||inp.vidDown)][i];
+ return [!!c?.name?.trim()&&!!c?.consent,!!inp.fold,['height','span','upper','fore'].every(k=>Number(inp[k])>0),!!inp.post,!!inp.hip,!!inp.trial,!!(inp.vidHip||inp.vidBack||inp.vidDown)][i];
 }
 function viewCheck(sid,step){
  const s=Store.session(sid);
@@ -261,22 +274,39 @@ function viewCheck(sid,step){
  </div></div>`;
  bindCheck();refreshLive();paintSave();
 }
+// Ohne Einwilligung keine Tests: Wechsel aus dem Profil-Schritt wird blockiert.
+function consentGate(target){
+ if(target===0||Store.client(S.clientId)?.consent)return true;
+ if(S.step!==0)go('#/check/'+S.sessionId+'/0');
+ setTimeout(()=>{const b=$('#consentbox');if(b){b.classList.add('attention');b.scrollIntoView({behavior:'smooth',block:'center'});}},50);
+ toast('Bitte zuerst die Einwilligung des Kunden bestätigen.',3500);
+ return false;
+}
+function gotoStep(target){
+ if(!consentGate(target))return;
+ if(target>=7){pauseTimer();go('#/report/'+S.sessionId);return;}
+ go('#/check/'+S.sessionId+'/'+target);
+}
 function bindCheck(){
  app.onclick=e=>{
-  const g=e.target.closest('[data-go]');if(g){go('#/check/'+S.sessionId+'/'+g.dataset.go);return;}
+  const g=e.target.closest('[data-go]');if(g){gotoStep(parseInt(g.dataset.go,10)||0);return;}
   if(e.target.closest('#prev')){S.step===0?go('#/client/'+S.clientId):go('#/check/'+S.sessionId+'/'+(S.step-1));return;}
-  if(e.target.closest('#next')){if(S.step===0&&!S.timer.run&&S.timer.acc===0)startTimer();S.step===6?(pauseTimer(),go('#/report/'+S.sessionId)):go('#/check/'+S.sessionId+'/'+(S.step+1));return;}
+  if(e.target.closest('#next')){if(!consentGate(S.step+1))return;if(S.step===0&&!S.timer.run&&S.timer.acc===0)startTimer();gotoStep(S.step+1);return;}
   const side=e.target.closest('[data-client-side]');if(side){Store.saveClient({id:S.clientId,side:side.dataset.clientSide});$$('#side button').forEach(b=>b.setAttribute('aria-pressed',b===side));refreshLive();return;}
   const ch=e.target.closest('[data-k]');
   if(ch){
    const k=ch.dataset.k,v=ch.dataset.v;
    const sticky=['pain','focus','leadgrip','goal','miss'].includes(k);
    S.inputs[k]=(!sticky&&String(S.inputs[k])===v)?'':v;
-   if(k==='trial'&&S.inputs.trial===''&&false)return;
    $$(`[data-k="${k}"]`,app).forEach(b=>b.setAttribute('aria-pressed',String(S.inputs[k])===b.dataset.v));
    queueSave();refreshLive();
   }
   const sug=e.target.closest('[data-suggest]');if(sug){S.inputs.trial=sug.dataset.suggest;$$('[data-k="trial"]',app).forEach(b=>b.setAttribute('aria-pressed',S.inputs.trial===b.dataset.v));queueSave();refreshLive();}
+ };
+ app.onchange=e=>{
+  const t=e.target;if(t.id!=='f_consent')return;
+  Store.saveClient({id:S.clientId,consent:t.checked?new Date().toISOString():''});
+  $('#consentbox')?.classList.remove('attention');refreshLive();
  };
  app.oninput=e=>{
   const t=e.target;
@@ -328,6 +358,7 @@ function reportHTML(r){
  const slotKeys=[['fold','Hintere Hand'],['post','Drehachse'],['hip','Hüfte'],['top','Oberer Punkt'],['down','Abschwung']];
  const dna=slotKeys.map(([k,l])=>{const d=m.restricted?null:r.dna.find(x=>x.key===k);return `<div class="${d?'':'open'}"><small>${l}</small><b>${d?esc(d.value):(m.restricted?'pausiert':'offen')}</b></div>`;}).join('');
  const bodyKey=r.gripPicture||r.bodyPicture;
+ const usesPictures=!m.restricted&&!!(bodyKey||r.back||r.down?.plane);
  const drillCard=d=>`<div class="drill"><header><h4>${esc(d.title)}</h4><span class="chip">${d.minutes} Min.</span></header><p class="muted small" style="margin:0"><i>${esc(d.goal)}</i></p><ol>${d.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol><div class="watch"><b>Achte darauf:</b> ${esc(d.watch)}</div><p class="tiny muted" style="margin:6px 0 0">Umfang: ${esc(d.reps)}</p></div>`;
  return `
  <div class="report">
@@ -382,8 +413,10 @@ function reportHTML(r){
    <div class="tag-line">Grundlagen für jede Einheit</div>${r.drills.basis.filter(Boolean).map(drillCard).join('')}</div>`:''}
   <div class="offer"><small>Dein nächster Schritt</small><div class="offer-h"><div><h2>${esc(r.offer.name)}</h2><p>${r.offer.count} Termine à ${r.offer.minutes} Minuten</p></div><div class="price"><small>${esc(r.offer.priceLabel)}</small><b>${esc(r.offer.priceText)}</b></div></div>
    <div class="offer-s">${r.offer.sessions.map(se=>`<div><small>Termin ${se.n}</small><b>${esc(se.title)}</b><p>${esc(se.text)}</p></div>`).join('')}</div>
-   <p class="offer-f">Interesse? Sprich mich gern direkt an: www.matthiasberger.pro</p></div>
-  <div class="card flat"><p><b>Matthias Berger · Golf Professional</b><br><span class="muted">www.matthiasberger.pro</span></p></div>
+   <p class="offer-f">Interesse? Ruf an oder schreib mir per WhatsApp: <a href="tel:+${CONTACT.whatsapp}" style="color:inherit">${esc(CONTACT.phone)}</a> · <a href="https://wa.me/${CONTACT.whatsapp}" target="_blank" rel="noopener" style="color:inherit">WhatsApp öffnen</a> · ${esc(CONTACT.web)}</p></div>
+  <div class="card flat"><p><b>${esc(CONTACT.name)}</b><br><span class="muted">${esc(CONTACT_LINE)}</span></p>
+   <div class="callout gold"><b>Wichtiger Hinweis:</b> ${esc(DISCLAIMER)}</div>
+   ${usesPictures?`<p class="tiny muted" style="margin:8px 0 0">${esc(CREDITS)}</p>`:''}</div>
  </div>`;
 }
 function viewReport(sid){
@@ -394,7 +427,7 @@ function viewReport(sid){
  app.innerHTML=`
  <div class="row between no-print" style="margin-bottom:14px">
   <button class="btn ghost small" id="edit">‹ Check bearbeiten</button>
-  <div class="row"><button class="btn" id="pdf">PDF herunterladen</button>${canShare?'<button class="btn secondary" id="share">Teilen / Mail</button>':''}${c.email?'<button class="btn secondary" id="mail">E-Mail-Entwurf</button>':''}<button class="btn secondary" id="print">Drucken</button></div>
+  <div class="row"><button class="btn" id="pdf">PDF herunterladen</button>${canShare?'<button class="btn secondary" id="share">Teilen / Mail</button>':''}${c.email?'<button class="btn secondary" id="mail" title="Speichert das PDF und öffnet einen Mail-Entwurf; das PDF dort anhängen.">E-Mail mit PDF</button>':''}<button class="btn secondary" id="print">Drucken</button></div>
  </div>
  ${reportHTML(r)}
  <div class="row no-print" style="margin-top:6px"><button class="btn ghost" id="tolist">Zum Kunden</button><button class="btn ghost" id="again">Neuer Check für ${esc(clientName(c))}</button></div>`;
@@ -404,13 +437,20 @@ function viewReport(sid){
  $('#print').onclick=()=>window.print();
  const busy=async(btn,fn)=>{const old=btn.textContent;btn.disabled=true;btn.textContent='PDF wird erstellt …';try{await fn();}catch(e){console.error(e);toast('PDF konnte nicht erstellt werden: '+e.message,5000);}finally{btn.disabled=false;btn.textContent=old;}};
  $('#pdf').onclick=e=>busy(e.currentTarget,async()=>{const bytes=await makeReportPDF(r);await downloadBytes(bytes,pdfFileName(r));toast('PDF erstellt. Auf dem iPad unter „Downloads“ in Dateien.');});
- if(canShare)$('#share').onclick=e=>busy(e.currentTarget,async()=>{const bytes=await makeReportPDF(r);const file=new File([bytes],pdfFileName(r),{type:'application/pdf'});try{await navigator.share({files:[file],title:'Dein Schwung-DNA-Profil',text:'Hallo '+(c.name||'')+', hier ist dein persönlicher Schwung-DNA-Bericht.'});}catch(err){if(err.name!=='AbortError')throw err;}});
- if(c.email)$('#mail').onclick=()=>{const sub=encodeURIComponent('Dein Schwung-DNA-Profil'),body=encodeURIComponent('Hallo '+(c.name||'')+',\n\nanbei dein persönlicher Schwung-DNA-Bericht.\n\nDeine Aufgabe: '+r.priority+'\n\nViele Grüße\nMatthias Berger\nwww.matthiasberger.pro');location.href='mailto:'+encodeURIComponent(c.email)+'?subject='+sub+'&body='+body;};
+ if(canShare)$('#share').onclick=e=>busy(e.currentTarget,async()=>{const bytes=await makeReportPDF(r);const file=new File([bytes],pdfFileName(r),{type:'application/pdf'});try{await navigator.share({files:[file],title:'Dein Schwung-DNA-Profil',text:'Hallo '+(firstName(c.name)||'zusammen')+', hier ist dein persönlicher Schwung-DNA-Bericht.'});}catch(err){if(err.name!=='AbortError')throw err;}});
+ // mailto kann keine Anhänge mitgeben: PDF zuerst speichern, dann Entwurf öffnen; das PDF wird im Mailprogramm angehängt.
+ if(c.email)$('#mail').onclick=e=>busy(e.currentTarget,async()=>{
+  const bytes=await makeReportPDF(r);await downloadBytes(bytes,pdfFileName(r));
+  const sub=encodeURIComponent('Dein Schwung-DNA-Profil'),body=encodeURIComponent('Hallo '+(firstName(c.name)||'zusammen')+',\n\nanbei dein persönlicher Schwung-DNA-Bericht als PDF.\n\nDeine Aufgabe: '+r.priority+'\n\nViele Grüße\nMatthias Berger\n'+CONTACT_LINE);
+  toast('PDF gespeichert („Downloads“ in Dateien). Bitte im Mail-Entwurf anhängen.',6000);
+  setTimeout(()=>{location.href='mailto:'+encodeURIComponent(c.email)+'?subject='+sub+'&body='+body;},800);
+ });
  app.onclick=null;app.oninput=null;
 }
 
 // ---------- Start ----------
 $('#brand').onclick=()=>go('#/');
+Store.requestPersist();
 setInterval(paintSave,3000);
 window.addEventListener('beforeunload',flushSave);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
