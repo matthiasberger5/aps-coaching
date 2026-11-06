@@ -246,3 +246,7 @@ details.optional-drills>summary{cursor:pointer;font-weight:700;color:var(--green
 /* Datumsfeld darf in schmalen Spalten schrumpfen */
 .grid2>*,.grid3>*{min-width:0}
 input[type=date]{min-width:0;max-width:100%}
+
+.say{margin:12px 0 16px;padding:12px 14px;border-radius:12px;background:#fbf6e8;border-left:4px solid #c9a64a;font-size:15px;line-height:1.5}
+.say b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a6d1f;margin-bottom:4px}
+.offer-note{margin:14px 0 4px;padding:12px 14px;border-radius:12px;background:#fbf6e8;color:#1f2a24;font-weight:700;line-height:1.5}

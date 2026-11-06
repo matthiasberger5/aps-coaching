@@ -27,7 +27,7 @@ const Charts={
  },
  // Drei Bewegungstypen
  triad(activeKey){
-  const items=[['glide','Glide','seitlich'],['spin','Spin','drehend'],['launch','Launch','vertikal']];
+  const items=[['glide','Glide','seitliche Kraft'],['spin','Spin','Rotation'],['launch','Launch','vertikale Kraft']];
   return '<div class="triad">'+items.map(([k,n,s])=>`<div class="triad-item${activeKey===k?' on':''}"><b>${n}</b><span>${s}</span></div>`).join('')+'</div>';
  },
  // Drei Ebenen (oberster Punkt oder Abschwungzone)

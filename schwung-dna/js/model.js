@@ -7,12 +7,13 @@ const fmtDate=iso=>iso?iso.split('-').reverse().join('.'):'';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const PICTURES={
- gripweak:{src:'assets/grip/comparison.png',width:448,height:560,crop:{x:1232,y:508,width:448,height:560},caption:'Vordere Hand schwächer: weniger sichtbare Knöchel. Nur die vordere Hand etwas verändern; die hintere Hand beibehalten. Foto: HackMotion.'},
- gripneutral:{src:'assets/grip/comparison.png',width:448,height:560,crop:{x:672,y:508,width:448,height:560},caption:'Vordere Hand neutral: Beispiel zur Orientierung, kein verbindlicher Knöchelwert. Foto: HackMotion.'},
- gripstrong:{src:'assets/grip/comparison.png',width:448,height:560,crop:{x:112,y:508,width:448,height:560},caption:'Vordere Hand stärker: mehr sichtbare Knöchel. Nur die vordere Hand etwas verändern; die hintere Hand beibehalten. Foto: HackMotion.'},
+ gripweak:{src:'assets/grip/comparison.png',width:448,height:560,crop:{x:1232,y:508,width:448,height:560},caption:'Vordere Hand schwächer: weniger sichtbare Knöchel. Nur die vordere Hand etwas verändern; die hintere Hand beibehalten.'},
+ gripneutral:{src:'assets/grip/comparison.png',width:448,height:560,crop:{x:672,y:508,width:448,height:560},caption:'Vordere Hand neutral: Beispiel zur Orientierung, kein verbindlicher Knöchelwert.'},
+ gripstrong:{src:'assets/grip/comparison.png',width:448,height:560,crop:{x:112,y:508,width:448,height:560},caption:'Vordere Hand stärker: mehr sichtbare Knöchel. Nur die vordere Hand etwas verändern; die hintere Hand beibehalten.'},
  under:{src:'assets/new-horizons/swing_path_under_sequence1a-360x131.png',width:360,height:131,caption:'Under: hintere Handfläche eher nach oben; die Armstreckung verläuft eher nach außen. Beispiel der Armbewegung, keine Griff-Nahaufnahme.'},
  sideon:{src:'assets/new-horizons/swing_path_side-on_seqjuence1a-360x143.png',width:360,height:143,caption:'Side On: hintere Handfläche eher seitlich; die Armstreckung verläuft nach unten und außen. Beispiel der Armbewegung, keine Griff-Nahaufnahme.'},
  ontop:{src:'assets/new-horizons/swing_path_on-top_sequence1a-360x139.png',width:360,height:139,caption:'On Top: hintere Handfläche eher zum Boden; die Armstreckung verläuft eher nach unten. Beispiel der Armbewegung, keine Griff-Nahaufnahme.'},
+ powertypes:{src:'assets/golf-com/power-types.png',width:942,height:662,caption:''},
  track:{src:'assets/new-horizons/Swing_Track_3_topsets4-375x190.png',width:375,height:190,caption:'Vorderer Arm am höchsten Punkt: links unterhalb, mittig auf Höhe, rechts oberhalb der Schulterlinie.'},
  shaft:{src:'assets/new-horizons/slotting_-down_RDL_2-405x231.png',width:405,height:231,caption:'Hüftnahe Zone: Hände und Schläger werden im unteren Bereich zum Ball geführt. Modellbereich: Steißbein bis Nabel.'},
  elbow:{src:'assets/new-horizons/slotting_-cross_RDL_2-405x217.png',width:405,height:217,caption:'Rumpfnahe Zone: Hände und Schläger werden im mittleren Bereich zum Ball geführt. Modellbereich: Nabel bis unteres Brustbein.'},
@@ -24,9 +25,9 @@ const CREDITS='Bildquellen: E.A. Tischler / New Horizons Golf Approach (newhoriz
 // Hinweis für Kunden; erscheint am Ende von Bericht und PDF.
 const DISCLAIMER='Dieser Bericht beschreibt Trainingsansätze aus einem Coaching-Screening. Er ist keine medizinische Untersuchung und ersetzt keine ärztliche oder physiotherapeutische Beratung. Alle Ansätze sind Vorschläge zum Ausprobieren; entscheidend ist der Vergleich am Ball. Bei Schmerzen oder Beschwerden die Übung sofort beenden und ärztlichen Rat einholen.';
 // Erklärung der Rangfolge für Bericht und PDF
-const RANKING_NOTE='Die Punkte zeigen, wie eindeutig ein Befund ist: bei der Körperbewegung, wie klar die Mehrheit deiner fünf Tests ist; beim Griff, ob Hüfttempo und hintere Hand in dieselbe Richtung zeigen; bei Rückschwung und Abschwung, wie deutlich deine Maße vom Gleichstand abweichen. Der klarste Punkt ist dein erster Vergleichspunkt; die weiteren sind Themen für die nächsten Termine.';
+const RANKING_NOTE='Die Punkte zeigen, wie eindeutig ein Befund ist: bei der Körperbewegung, wie klar die Mehrheit deiner fünf Tests ist; beim Griff, ob Hüfttempo und hintere Hand in dieselbe Richtung zeigen; bei Rückschwung und Abschwung, wie deutlich deine Maße vom Gleichstand abweichen. Der klarste Punkt ist dein erster Vergleichspunkt; die weiteren kannst du danach nacheinander angehen.';
 // Kontakt zentral pflegen (Bericht, PDF, E-Mail).
-const CONTACT={name:'Matthias Berger · Golf Professional',phone:'0171 9045523',whatsapp:'491719045523',web:'www.matthiasberger.pro'};
+const CONTACT={name:'Matthias Berger · Master Golf Professional',phone:'0171 9045523',whatsapp:'491719045523',web:'www.matthiasberger.pro'};
 const CONTACT_LINE='Telefon und WhatsApp '+CONTACT.phone+' · '+CONTACT.web;
 const firstName=n=>(n||'').trim().split(/\s+/)[0]||'';
 
@@ -61,7 +62,17 @@ function addOneMonth(iso){
 
 const GOALS=['Länge','Konstanz','Schmerzfrei spielen','Mehr Kontrolle'];
 const MISSES=['Slice','Hook','Fat','Top','Unterschiedlich'];
-function profileLine(inp){const p=[];if(inp.goal)p.push('Dein Ziel: '+inp.goal);if(inp.miss)p.push('Häufigster Fehlschlag: '+inp.miss);return p.join('  ·  ');}
+function profileLine(inp){return inp.miss&&inp.miss!=='Unterschiedlich'?'Dein häufigster Fehlschlag: '+inp.miss:'';}
+// Fehlschlag mit dem Hüfttyp abgleichen (Slice = Fläche offen, Hook = Fläche geschlossen)
+function missLine(miss,hip,restricted){
+ if(restricted||!miss||miss==='Unterschiedlich')return null;
+ if(miss==='Fat'||miss==='Top')return {match:'other',text:'Fette und getoppte Schläge hängen meist mit dem tiefsten Punkt des Schwungs und dem Gleichgewicht zusammen, weniger mit dem Hüfttempo.'};
+ const T={Slow:'langsamen',Mid:'mittleren',Fast:'schnellen'}[hip];if(!T)return null;
+ const fits=(hip==='Fast'&&miss==='Slice')||(hip==='Slow'&&miss==='Hook');
+ if(fits)return {match:'yes',text:'Dein häufigster Fehlschlag, der '+miss+', passt zu deinem '+T+' Hüfttyp: Die Schlagfläche '+(miss==='Slice'?'bleibt im Treffmoment eher offen':'schließt im Treffmoment eher früh')+'. Genau hier setzt dein Ziel-Setup an.'};
+ if(hip==='Mid')return {match:'other',text:'Bei deinem mittleren Hüfttyp erklärt das Hüfttempo deinen '+miss+' nicht allein. Die Ursache liegt eher in Griff oder Schwungbahn.'};
+ return {match:'no',text:'Dein häufigster Fehlschlag, der '+miss+', passt nicht zu deinem '+T+' Hüfttyp, der eher zu '+(hip==='Fast'?'offenen':'geschlossenen')+' Schlagflächen führt. Die Ursache liegt vermutlich woanders, zum Beispiel in Griff oder Schwungbahn.'};
+}
 const VID_RES={yes:'bestätigt',part:'teilweise',no:'weicht ab'};
 const VID_HIP={Slow:'Hüfte eher zurück (Slow)',Mid:'Hüfte neutral (Mid)',Fast:'Hüfte eher voraus (Fast)'};
 function videoBlock(model,inp,restricted){
@@ -73,8 +84,8 @@ function videoBlock(model,inp,restricted){
  ].filter(x=>VID_RES[x.res]).map(x=>({...x,result:VID_RES[x.res]}));
  if(!items.length)return null;
  const off=items.filter(x=>x.res==='no').map(x=>x.label),part=items.filter(x=>x.res==='part').map(x=>x.label);
- const summary=off.length?'Im Video weicht ab: '+off.join(', ')+'. Wir richten den Vergleichspunkt nach dem, was im Schwung zu sehen ist, und prüfen es beim nächsten Termin.'
-  :part.length?'Das Video bestätigt die Tests zum Teil ('+part.join(', ')+' nur teilweise). Wir beobachten das beim nächsten Termin genauer.'
+ const summary=off.length?'Im Video weicht ab: '+off.join(', ')+'. Dieser Punkt kommt deshalb nicht als Vergleichspunkt in Frage; dein Schwung zeigt hier etwas anderes als der Test.'
+  :part.length?'Das Video bestätigt die Tests zum Teil ('+part.join(', ')+' nur teilweise). Diese Punkte haben bei der Wahl des Vergleichspunkts weniger Gewicht.'
   :'Das Video bestätigt die Testergebnisse.';
  return {items,summary,note:(inp.vidNote||'').trim()};
 }
@@ -92,14 +103,14 @@ function buildOffer(model,date){
   else{title='Zusammenführen';text='Übernommene Punkte verbinden und auf die Runde übertragen.';}
   sessions.push({n:i+1,title,text});
  }
- return {name:OFFER.name,count:OFFER.count,minutes:OFFER.minutes,price:OFFER.price,currency:OFFER.currency,validUntil,priceLabel:OFFER.priceLabel+' bis '+fmtDate(validUntil),priceText:OFFER.price+' '+OFFER.currency,sessions};
+ return {name:OFFER.name,count:OFFER.count,minutes:OFFER.minutes,price:OFFER.price,currency:OFFER.currency,validUntil,priceLabel:OFFER.priceLabel+' bei Buchung bis '+fmtDate(validUntil),bookingNote:'Der Sonderpreis gilt, wenn du das Paket bis zum '+fmtDate(validUntil)+' buchst. Die drei Termine selbst kannst du danach in Ruhe planen, auch '+(Number(String(validUntil).slice(5,7))>=10?'erst '+(Number(String(validUntil).slice(0,4))+1):'einige Wochen oder Monate später')+'. Entscheidend ist nur das Buchungsdatum.',priceText:OFFER.price+' '+OFFER.currency,sessions};
 }
 
 function buildReport(inp,client={}){
  const n=k=>inp[k]===''||inp[k]==null?null:Number(inp[k]);
  const h=n('height'),w=n('span'),u=n('upper'),f=n('fore');
  const complete=[h,w,u,f].every(x=>x!==null&&Number.isFinite(x)&&x>0);
- const model=evaluateScreening({height:h,span:w,upper:u,fore:f,fold:inp.fold,leadgrip:inp.leadgrip,post:inp.post,pressure:inp.pressure,hip:inp.hip,trial:inp.trial,focus:inp.focus,pain:inp.pain});
+ const model=evaluateScreening({height:h,span:w,upper:u,fore:f,fold:inp.fold,leadgrip:inp.leadgrip,post:inp.post,pressure:inp.pressure,hip:inp.hip,trial:inp.trial,focus:inp.focus,pain:inp.pain,vid:{hip:inp.vidHip,back:inp.vidBack,down:inp.vidDown}});
  const restricted=model.restricted;
  const lead=!restricted&&model.focusWhy&&model.chosenFocus?model.focusWhy+' Wir vergleichen deshalb zuerst: '+model.focusName+'.':null;
  const finding=restricted?'Beschwerden wurden angegeben; wir empfehlen noch keine Bewegungsänderung.':lead?lead:complete?'Deine Tests liefern Ansätze für Griff, Körperbewegung und Schwungführung.':'Bitte die vier Körpermaße vervollständigen.';
@@ -124,13 +135,37 @@ function buildReport(inp,client={}){
   note:inp.finding?.trim()||'',
   measures:{height:h,span:w,upper:u,fore:f},
   measurements:complete?'Körpergröße '+fmt(h)+' cm · Spannweite '+fmt(w)+' cm · Oberarm '+fmt(u)+' cm · Ellenbogen–Fingerknöchel '+fmt(f)+' cm.':'',
-  model,gripPicture,bodyPicture,inputs:{...inp},profileLine:profileLine(inp),video:videoBlock(model,inp,restricted),
+  model,gripPicture,bodyPicture,setup:setupBlock(inp.hip,client.side||inp.side||'Rechts',model),inputs:{...inp},profileLine:profileLine(inp),miss:missLine(inp.miss,inp.hip,restricted),video:videoBlock(model,inp,restricted),
   power:restricted?null:model.power,back:restricted?null:model.back,down:restricted?null:model.down,
   priority:model.priority,planTitle:model.planTitle,steps:model.steps,criterion:model.criterion,decision:model.decision,focusWhy:model.focusWhy,ranking:model.ranking,next:model.next,
   drills,offer,dna,done,doneCount:done.filter(Boolean).length,
   scores:{habit:hh,compare:hc,feel:inp.feel,verdict:scoreVerdict},
   hasScores:['compare','favorable'].includes(model.status)
  };
+}
+
+// Satz unter dem Bild der Bewegungstypen
+function powerTypeLine(power){
+ const T={glide:'seitliche Bewegung zum Ziel (Glide). Im Bild: The Glider',spin:'Rotation (Spin). Im Bild: The Spinner',launch:'Druck in den Boden und Aufrichten (Launch). Im Bild: The Launcher'};
+ return T[power?.key]?'Deine Kraftquelle: '+T[power.key]+', grün umrandet.':'Du nutzt mehrere Kraftquellen. Im Bild ist deshalb kein einzelner Typ markiert.';
+}
+
+// Setup-Empfehlung nach Hüfttyp (Matthias Berger, nach Bill Schmedes III)
+function setupBlock(hip,side,model){
+ if(model.restricted||!['Slow','Mid','Fast'].includes(hip))return null;
+ const t=side==='Links'?'linke':'rechte';
+ const S={
+  Slow:{name:'Langsamer Hüfttyp',text:'Deine Hüfte dreht im Abschwung eher ruhig. Dadurch schließt sich die Schlagfläche im Treffmoment schnell, und der Ball kann nach links ziehen. Ein etwas schwächerer Griff, eine Ballposition weiter vorn und ein leicht geöffneter vorderer Fuß helfen dir, Ober- und Unterkörper besser zu synchronisieren.',
+   rows:[['Griff','maximal 2 Knöchel sichtbar (eher schwach)'],['V obere Hand','zeigt auf die Nase'],['V hintere Hand','zeigt auf das '+t+' Ohr'],['Ballposition','einen Ball weiter vorn als Standard'],['Abstand zum Ball','etwas weiter weg (mehr als eine Handbreit zwischen Körper und Griff)'],['Füße','vorderer Fuß ca. 20° zum Ziel geöffnet']]},
+  Mid:{name:'Mittlerer Hüfttyp',text:'Deine Hüfte und dein Oberkörper arbeiten im Abschwung gut im Gleichgewicht. Für dich passt das klassische Setup: neutraler Griff, Standard-Ballposition und etwa eine Handbreit Abstand zwischen Körper und Griff.',
+   rows:[['Griff','klassisch, 2 Knöchel sichtbar'],['V obere Hand','zeigt auf das '+t+' Auge'],['V hintere Hand','zeigt auf das '+t+' Ohr'],['Ballposition','Standard'],['Abstand zum Ball','eine Handbreit zwischen Körper und Griff'],['Füße','Standardposition']]},
+  Fast:{name:'Schneller Hüfttyp',text:'Deine Hüfte dreht im Abschwung schnell und läuft dem Oberkörper voraus. Dadurch bleibt die Schlagfläche oft länger offen, typisch für einen Fade oder Slice. Ein kräftigerer Griff, eine Ballposition etwas weiter hinten und ein etwas näherer Stand zum Ball helfen, die Fläche rechtzeitig zu schließen.',
+   rows:[['Griff','stärker, 3 bis 3,5 Knöchel sichtbar'],['V obere Hand','zeigt auf das '+t+' Ohr'],['V hintere Hand','zeigt auf das '+t+' Ohr'],['Ballposition','eine Ballbreite weiter hinten als Standard'],['Abstand zum Ball','etwas näher (weniger als eine Handbreit zwischen Körper und Griff)'],['Füße','beide Füße ca. 20° nach außen gedreht']]}
+ }[hip];
+ let rows=S.rows;
+ if(model.gripConflict)rows=[['Griff','Noch keine Vorgabe: Hip-Speed-Test und Arm-Pendeltest zeigen für die beiden Hände in unterschiedliche Richtungen. Prüfe den Griff zuerst am Ballflug.'],...S.rows.slice(3)];
+ const intro='Das ist dein Ziel-Setup als Orientierung, keine Änderung auf einmal. Nimm die Punkte nacheinander auf: zuerst den Griff, dann Ballposition und Abstand, zuletzt die Füße. Prüfe jede Änderung am Ball, bevor du die nächste dazunimmst.';
+ return {...S,rows,key:hip,intro,note:''};
 }
 
 // Übersicht aller Tests: Beobachtung und Ergebnis im Modell (für Bericht und PDF)

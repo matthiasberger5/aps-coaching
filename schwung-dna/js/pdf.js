@@ -13,14 +13,14 @@ async function createReportPDF(r,opts={}){
  const {PDFDocument,StandardFonts}=PDFLib;
  const doc=await PDFDocument.create();
  const title='Schwung-DNA · '+(r.name||'Bericht');
- doc.setTitle(clean(title));doc.setAuthor('Matthias Berger · Golf Professional');doc.setSubject('Persönlicher Schwung-DNA-Bericht');doc.setCreator('Schwung-DNA App');doc.setProducer('pdf-lib');
+ doc.setTitle(clean(title));doc.setAuthor('Matthias Berger · Master Golf Professional');doc.setSubject('Persönlicher Schwung-DNA-Bericht');doc.setCreator('Schwung-DNA App');doc.setProducer('pdf-lib');
  try{doc.setLanguage('de-DE');}catch(e){}
  const F={r:await doc.embedFont(StandardFonts.Helvetica),b:await doc.embedFont(StandardFonts.HelveticaBold),i:await doc.embedFont(StandardFonts.HelveticaOblique)};
  const W=A4.w,H=A4.h,CW=W-2*M;
  let page=null,y=0;const pages=[];
  const img={};
  if(opts.loadImage){
-  const keys=new Set([r.gripPicture||r.bodyPicture,r.back?'track':null,r.down?.plane].filter(Boolean));
+  const keys=new Set([r.gripPicture||r.bodyPicture,r.back?'track':null,r.power?'powertypes':null,r.down?.plane].filter(Boolean));
   for(const k of keys){try{const bytes=await opts.loadImage(k,r);if(bytes)img[k]=await doc.embedPng(bytes);}catch(e){console.warn('Bild nicht geladen',k,e);}}
  }
 
@@ -81,10 +81,10 @@ async function createReportPDF(r,opts={}){
   if(num){rrect(M,y,26,18,6,{fill:C.green2});const nw=width(String(num),'b',10);page.drawText(String(num),{x:M+(26-nw)/2,y:y-13,size:10,font:F.b,color:hex(C.white)});}
   page.drawText(clean(titleText),{x:M+(num?36:0),y:y-14,size:17,font:F.b,color:hex(C.ink)});
   y-=26;
-  if(sub){para(sub,{s:10,color:C.muted,gap:4});}
+  if(sub){para(sub,{s:9.5,color:C.muted,gap:4});}
   line(M,y,W-M,y,C.line,0.8);y-=12;
  }
- function callout(text,{fill=C.mint,bar=C.green2,f='r',s=10.5,label=null,color=C.ink}={}){
+ function callout(text,{fill=C.mint,bar=C.green2,f='r',s=9.5,label=null,color=C.ink}={}){
   const pad=12,w=CW-pad*2-6;
   const lh=label?14:0,h=textH(text,{f,s,w})+pad*2+lh;
   need(h+8);
@@ -114,11 +114,13 @@ async function createReportPDF(r,opts={}){
  function imageH(key,boxW,boxH){const im=img[key];if(!im)return 0;const sc=Math.min(boxW/im.width,boxH/im.height);return im.height*sc+16;}
 
  // Tabelle mit Zeilenumbruch
+ function tableH(cols,rows,fs=9.5){const ws=cols.map(c=>c-16);return 22+rows.reduce((a,row)=>a+Math.max(...row.map((t,i)=>wrap(t,i===0?'b':'r',fs,ws[i]).length))*fs*1.35+14,0)+10;}
+ const PAGE_USABLE=TOP(H)-BOTTOM;
  function table(cols,head,rows,{s:fs=9.5}={}){
   const pad=8,ws=cols.map(c=>c-pad*2);
-  let hh=22;need(hh+40);
+  let hh=22;const th=tableH(cols,rows,fs);need(th<=PAGE_USABLE?th:hh+40);
   rrect(M,y,CW,hh,6,{fill:C.mint});
-  let cx=M;head.forEach((t,i)=>{spaced(t.toUpperCase(),cx+pad,y-14,{s:6.3,color:C.green2,sp:0.5});cx+=cols[i];});y-=hh;
+  let cx=M;head.forEach((t,i)=>{spaced(t.toUpperCase(),cx+pad,y-14,{s:7.5,color:C.green2,sp:0.5});cx+=cols[i];});y-=hh;
   rows.forEach((row,ri)=>{
    const ls=row.map((t,i)=>wrap(t,i===0?'b':'r',fs,ws[i])),rh=Math.max(...ls.map(l=>l.length))*fs*1.35+14;
    need(rh);
@@ -139,15 +141,15 @@ async function createReportPDF(r,opts={}){
   });
   return h;
  }
- const POWER=[['glide','Glide','seitlich'],['spin','Spin','drehend'],['launch','Launch','vertikal']];
+ const POWER=[['glide','Glide','seitliche Kraft'],['spin','Spin','Rotation'],['launch','Launch','vertikale Kraft']];
  const TOPS=[['low','Tief','unter der Schulterlinie'],['mid','Mittel','auf der Schulterlinie'],['high','Hoch','über der Schulterlinie']];
  const DOWNS=[['shaft','Hüftnah','Steißbein bis Nabel'],['elbow','Rumpfnah','Nabel bis Brustbein'],['shoulder','Schulternah','Brustbein bis Schädelansatz']];
 
  // Horizontaler Vergleichsbalken zweier Maße
  function compareBars(aLabel,a,bLabel,b,x,top,w){
-  if(!(a>0)||!(b>0)){textAt('Messwerte fehlen',x,top,{s:9,color:C.faint,w});return 20;}
+  if(!(a>0)||!(b>0)){textAt('Messwerte fehlen',x,top,{s:9.5,color:C.faint,w});return 20;}
   const lo=Math.min(a,b)*0.88,hi=Math.max(a,b)*1.02,bw=w-60,sc=v=>12+(v-lo)/(hi-lo)*(bw-12);
-  const bar=(label,v,ty,col)=>{textAt(label,x,ty,{s:8.5,color:C.muted,w});rrect(x,ty-14,bw,11,5.5,{fill:'#edf1ea'});rrect(x,ty-14,sc(v),11,5.5,{fill:col});page.drawText(fmtN(v)+' cm',{x:x+bw+8,y:ty-24,size:9,font:F.b,color:hex(C.ink)});};
+  const bar=(label,v,ty,col)=>{textAt(label,x,ty,{s:8,color:C.muted,w});rrect(x,ty-14,bw,11,5.5,{fill:'#edf1ea'});rrect(x,ty-14,sc(v),11,5.5,{fill:col});page.drawText(fmtN(v)+' cm',{x:x+bw+8,y:ty-24,size:9.5,font:F.b,color:hex(C.ink)});};
   bar(aLabel,a,top,'#b7c7ba');bar(bLabel,b,top-34,C.green2);
   const d=b-a;textAt('Differenz '+(d>0?'+':d<0?'-':'±')+fmtN(Math.abs(d))+' cm',x,top-68,{s:8,color:C.muted,w});
   return 80;
@@ -161,7 +163,7 @@ async function createReportPDF(r,opts={}){
  page.drawRectangle({x:0,y:H-bandH,width:W,height:bandH,color:hex(C.green)});
  page.drawRectangle({x:0,y:H-bandH,width:W,height:5,color:hex(C.gold)});
  [[W-100,H-135,34],[W-100,H-135,62],[W-100,H-135,92]].forEach(([cx,cy,rad],i)=>circle(cx,cy,rad,{stroke:'#ffffff',sw:1,opacity:0.14-i*0.03}));
- spaced('MATTHIAS BERGER  ·  GOLF PROFESSIONAL',M,H-54,{s:8.5,color:C.lightgreen,sp:1.6});
+ spaced('MATTHIAS BERGER  ·  MASTER GOLF PROFESSIONAL',M,H-54,{s:8.5,color:C.lightgreen,sp:1.6});
  page.drawText('Dein',{x:M,y:H-116,size:40,font:F.r,color:hex(C.white)});
  page.drawText('Schwung-DNA-Profil',{x:M,y:H-160,size:40,font:F.b,color:hex(C.white)});
  line(M,H-182,M+48,H-182,C.gold,2.5);
@@ -170,22 +172,22 @@ async function createReportPDF(r,opts={}){
  page.drawText(clean(fmtD(r.date)+'   ·   Spielseite '+r.side+'   ·   20-Minuten-Bio-Swing-Screening'),{x:M,y:H-232-(nl.length-1)*(ns+5),size:10.5,font:F.r,color:hex(C.mint2)});
  y=H-bandH-30;
  // Profil auf einen Blick
- page.drawText('Dein Profil auf einen Blick',{x:M,y:y-14,size:15,font:F.b,color:hex(C.ink)});y-=30;
+ page.drawText('Dein Profil auf einen Blick',{x:M,y:y-14,size:12.5,font:F.b,color:hex(C.ink)});y-=30;
  const slots=[['fold','Hintere Hand'],['post','Drehachse'],['hip','Hüfte'],['top','Oberer Punkt'],['down','Abschwung']];
  const tw=(CW-4*8)/5;
  slots.forEach(([k,label],i)=>{
   const d=r.model.restricted?null:r.dna.find(x=>x.key===k),bx=M+i*(tw+8);
   if(d){rrect(bx,y,tw,62,10,{fill:C.mint});page.drawRectangle({x:bx,y:y-62,width:tw,height:3,color:hex(C.green2)});}
   else rrect(bx,y,tw,62,10,{fill:C.paper,stroke:'#c9d1c8',dash:[3,3],sw:0.9});
-  spaced(label.toUpperCase(),bx+10,y-20,{s:6.3,color:d?C.green2:C.faint,sp:0.7});
+  spaced(label.toUpperCase(),bx+10,y-20,{s:7.5,color:d?C.green2:C.faint,sp:0.7});
   const val=d?d.value:(r.model.restricted?'pausiert':'offen'),fs=width(val,'b',12.5)>tw-16?10.5:12.5;
   page.drawText(clean(val),{x:bx+10,y:y-42,size:fs,font:F.b,color:hex(d?C.ink:C.faint)});
  });
  y-=62+22;
  // Zusammenfassung
- callout(r.finding,{label:'DAS NEHMEN WIR AUS DEINEM SCREENING MIT',s:11});
+ callout(r.finding,{label:'DAS NEHMEN WIR AUS DEINEM SCREENING MIT',s:10.5});
  para(r.priority,{f:'b',s:12.5,color:C.green,gap:r.profileLine?4:12});
- if(r.profileLine)para(r.profileLine,{s:10,color:C.muted,gap:12});
+ if(r.profileLine)para(r.profileLine,{s:9.5,color:C.muted,gap:12});
  // Körpermaße
  if(r.measures&&r.measures.height>0){
   page.drawText('Deine Körpermaße',{x:M,y:y-12,size:12.5,font:F.b,color:hex(C.ink)});y-=26;
@@ -199,7 +201,7 @@ async function createReportPDF(r,opts={}){
  need(96);
  rrect(M,y,CW,86,12,{fill:C.paper,stroke:C.line});
  spaced('SO LIEST DU DIESEN BERICHT',M+16,y-22,{s:7.5,color:C.green2});
- textAt(r.model.restricted?'Seite 2: dein Hinweis bis zum nächsten Termin. Bewegungsänderungen stellen wir zurück, bis geklärt ist, welche Bewegungen du beschwerdefrei ausführen kannst.':'Seite 2: deine Aufgabe bis zum nächsten Training. Danach folgen Bewegungsansatz und Griff, Rückschwung und Abschwung, passende Übungen und dein Angebot für die nächsten Termine. Alles sind Ansätze zum Ausprobieren: Wir ändern immer nur einen Punkt und entscheiden am Ball.',M+16,y-32,{s:9.5,color:C.muted,w:CW-32});
+ textAt(r.model.restricted?'Seite 2: dein Hinweis. Bewegungsänderungen stellen wir zurück, bis geklärt ist, welche Bewegungen du beschwerdefrei ausführen kannst.':'Seite 2: deine Aufgabe zum selbst Ausprobieren. Danach folgen Kraftquelle, Griff, Rückschwung und Abschwung, passende Übungen und ein Angebot, falls du die Ergebnisse gemeinsam mit mir umsetzen möchtest. Alles sind Ansätze zum Ausprobieren: Ändere immer nur einen Punkt und entscheide am Ball.',M+16,y-32,{s:9.5,color:C.muted,w:CW-32});
  y-=86+10;
 
  // ================= Aufgabe =================
@@ -218,132 +220,178 @@ async function createReportPDF(r,opts={}){
  }
  {
   const n=r.steps.length,gap=10,cwid=(CW-gap*(n-1))/n,tw2=cwid-26;
-  const hs=r.steps.map(st=>16+24+wrap(st.title,'b',11,tw2).length*14+4+wrap(st.text,'r',9.4,tw2).length*9.4*1.42+16);
+  const hs=r.steps.map(st=>16+24+wrap(st.title,'b',11,tw2).length*14+4+wrap(st.text,'r',9.5,tw2).length*9.5*1.42+16);
   const hh=Math.max(...hs);need(hh+14);
   r.steps.forEach((st,i)=>{
    const x=M+i*(cwid+gap);rrect(x,y,cwid,hh,14,{fill:C.white,stroke:C.line,sw:1});
    circle(x+25,y-26,11,{fill:C.green});const nn=String(i+1);page.drawText(nn,{x:x+25-width(nn,'b',10.5)/2,y:y-29.5,size:10.5,font:F.b,color:hex(C.white)});
    let ty=y-50;wrap(st.title,'b',11,tw2).forEach(ln=>{page.drawText(ln,{x:x+13,y:ty-10,size:11,font:F.b,color:hex(C.ink)});ty-=14;});ty-=4;
-   textAt(st.text,x+13,ty,{s:9.4,w:tw2,lh:1.42,color:C.ink});
+   textAt(st.text,x+13,ty,{s:9.5,w:tw2,lh:1.42,color:C.ink});
   });
   y-=hh+14;
  }
  if(r.decision){
-  const gap=10,cwid=(CW-gap)/2,tw2=cwid-30,hh=Math.max(textH(r.decision.adopt,{s:9.8,w:tw2}),textH(r.decision.keep,{s:9.8,w:tw2}))+46;
+  const gap=10,cwid=(CW-gap)/2,tw2=cwid-30,hh=Math.max(textH(r.decision.adopt,{s:9.5,w:tw2}),textH(r.decision.keep,{s:9.5,w:tw2}))+46;
   need(hh+14);
   rrect(M,y,cwid,hh,12,{fill:C.mint});rrect(M+cwid+gap,y,cwid,hh,12,{fill:C.paper,stroke:C.line,sw:1});
-  spaced('ÜBERNEHMEN, WENN …',M+15,y-22,{s:7.2,color:C.green2});textAt(r.decision.adopt,M+15,y-32,{s:9.8,w:tw2,f:'b'});
-  spaced('GEWOHNT WEITERSPIELEN, WENN …',M+cwid+gap+15,y-22,{s:7.2,color:C.muted});textAt(r.decision.keep,M+cwid+gap+15,y-32,{s:9.8,w:tw2,color:C.muted});
+  spaced('ÜBERNEHMEN, WENN …',M+15,y-22,{s:7.5,color:C.green2});textAt(r.decision.adopt,M+15,y-32,{s:9.5,w:tw2,f:'b'});
+  spaced('GEWOHNT WEITERSPIELEN, WENN …',M+cwid+gap+15,y-22,{s:7.5,color:C.muted});textAt(r.decision.keep,M+cwid+gap+15,y-32,{s:9.5,w:tw2,color:C.muted});
   y-=hh+14;
- }else callout(r.criterion,{fill:C.goldbg,bar:C.gold,label:'HINWEIS',f:'b',s:10.5});
+ }else callout(r.criterion,{fill:C.goldbg,bar:C.gold,label:'HINWEIS',f:'b',s:9.5});
  if(r.hasScores){
-  y-=2;page.drawText('Saubere Treffer festhalten (jeweils fünf Bälle)',{x:M,y:y-11,size:11.5,font:F.b,color:hex(C.ink)});y-=24;
+  y-=2;page.drawText('Saubere Treffer festhalten (jeweils fünf Bälle)',{x:M,y:y-11,size:12.5,font:F.b,color:hex(C.ink)});y-=24;
   const cols=[130,95,95,CW-320],hdr=['Einheit / Datum','Gewohnt','Vergleich','Gefühl: besser / gleich / schlechter'];
   need(30+3*30);
   let cx=M;rrect(M,y,CW,24,6,{fill:C.mint});
-  hdr.forEach((hh,i)=>{spaced(hh.toUpperCase(),cx+8,y-15,{s:6.3,color:C.green2,sp:0.5});cx+=cols[i];});y-=24;
+  hdr.forEach((hh,i)=>{spaced(hh.toUpperCase(),cx+8,y-15,{s:7.5,color:C.green2,sp:0.5});cx+=cols[i];});y-=24;
   const given=(r.scores.habit!==null||r.scores.compare!==null);
   const rows=[[given?'Im Termin  '+fmtD(r.date):'1  ·  ____________',given?(r.scores.habit??'_')+' / 5':'___ / 5',given?(r.scores.compare??'_')+' / 5':'___ / 5',given?({better:'besser',same:'gleich',worse:'schlechter'}[r.scores.feel]||''):'______________'],['2  ·  ____________','___ / 5','___ / 5','______________']];
-  rows.forEach((row,ri)=>{cx=M;row.forEach((cell,i)=>{page.drawText(clean(cell),{x:cx+8,y:y-19,size:10.5,font:ri===0&&given?F.b:F.r,color:hex(C.ink)});cx+=cols[i];});line(M,y-30,W-M,y-30,C.line);y-=30;});
+  rows.forEach((row,ri)=>{cx=M;row.forEach((cell,i)=>{page.drawText(clean(cell),{x:cx+8,y:y-19,size:9.5,font:ri===0&&given?F.b:F.r,color:hex(C.ink)});cx+=cols[i];});line(M,y-30,W-M,y-30,C.line);y-=30;});
   y-=12;
  }
  // Alle Befunde nach Klarheit
  if(!r.model.restricted&&r.ranking){
-  need(40+r.ranking.length*40+30);page.drawText('Alle Befunde nach Klarheit geordnet',{x:M,y:y-11,size:11.5,font:F.b,color:hex(C.ink)});y-=22;
+  need(40+r.ranking.length*40+30);page.drawText('Alle Befunde nach Klarheit geordnet',{x:M,y:y-11,size:12.5,font:F.b,color:hex(C.ink)});y-=22;
   const nameW=118,dotsW=64,findW=CW-34-nameW-dotsW-10;
   r.ranking.forEach((row,i)=>{
-   const fl=wrap(row.finding,'r',9.2,findW),hh=Math.max(34,fl.length*9.2*1.4+16),isFocus=row.key===r.model.chosenFocus&&row.available;
+   const fl=wrap(row.finding,'r',9.5,findW),hh=Math.max(34,fl.length*9.5*1.4+16),isFocus=row.key===r.model.chosenFocus&&row.available;
    need(hh+2);
    rrect(M,y,CW,hh,8,isFocus?{fill:C.mint}:{fill:C.white,stroke:C.line,sw:0.8});
    circle(M+18,y-hh/2,9,{fill:isFocus?C.green:'#dfe5dc'});const nn=String(i+1);page.drawText(nn,{x:M+18-width(nn,'b',9.5)/2,y:y-hh/2-3.3,size:9.5,font:F.b,color:hex(isFocus?C.white:C.muted)});
-   page.drawText(clean(row.name),{x:M+36,y:y-hh/2-3.5,size:10,font:F.b,color:hex(isFocus?C.green:C.ink)});
-   fl.forEach((ln,j)=>page.drawText(ln,{x:M+36+nameW,y:y-(hh-fl.length*9.2*1.4)/2-9.2*0.95-j*9.2*1.4,size:9.2,font:F.r,color:hex(row.available?C.ink:C.faint)}));
+   page.drawText(clean(row.name),{x:M+36,y:y-hh/2-3.5,size:9.5,font:F.b,color:hex(isFocus?C.green:C.ink)});
+   fl.forEach((ln,j)=>page.drawText(ln,{x:M+36+nameW,y:y-(hh-fl.length*9.5*1.4)/2-9.5*0.95-j*9.5*1.4,size:9.5,font:F.r,color:hex(row.available?C.ink:C.faint)}));
    for(let d=0;d<3;d++)circle(W-M-14-(2-d)*14-0,y-hh/2,4.6,row.score>d?{fill:isFocus?C.green:C.green2}:{stroke:'#aab6ac',sw:1});
    y-=hh+4;
   });
   y-=4;
-  if(r.model.tieNote)para(r.model.tieNote,{s:9.4,gap:4});
-  para(RANKING_NOTE+' (Drei Punkte: sehr deutlich, zwei: deutlich, einer: leicht.)',{s:8.2,color:C.muted,gap:12});
+  if(r.model.tieNote)para(r.model.tieNote,{s:9.5,gap:4});
+  para(RANKING_NOTE+' (Drei Punkte: sehr deutlich, zwei: deutlich, einer: leicht.)',{s:8,color:C.muted,gap:12});
  }
  y-=4;
  if(r.video){
+  const vrows=r.video.items.map(o=>[o.label,o.expected||'offen',o.result]);
+  need(8+58+tableH([128,200,CW-328],vrows));
   y-=8;section('','Abgleich mit deinem Schwung-Video');
-  table([128,200,CW-328],['Punkt','Test sagt','Video zeigt'],r.video.items.map(o=>[o.label,o.expected||'offen',o.result]));
+  table([128,200,CW-328],['Punkt','Test sagt','Video zeigt'],vrows);
   para(r.video.summary,{s:10.5,gap:6});
   if(r.video.note)para('Notiz: '+r.video.note,{s:9.5,color:C.muted});
  }
- section('', 'Was wir beim nächsten Termin überprüfen');
- para(r.next,{s:11});
+ section('', 'So geht es für dich weiter');
+ para(r.next,{s:10.5});
  if(r.note){callout(r.note,{label:'PERSÖNLICHE NOTIZ VON MATTHIAS',f:'i'});}
 
- // ================= 1 · Bewegungsansatz & Griff =================
+ // ================= 1 · Kraftquelle =================
  if(!r.model.restricted){
-  newPage();
-  section(1,'Dein Bewegungsansatz und Griff','Bewegungstyp aus allen fünf Tests, Griff aus Arm-Pendeltest und Hip-Speed-Test.');
-  const bodyKey=r.gripPicture||r.bodyPicture,imgW=150,gap=20,tw2=bodyKey&&img[bodyKey]?CW-imgW-gap:CW;
-  const top1=y;
-  let ty=y;
+  var orows=testOverview(r).map(o=>[o.test,o.seen,o.result]),overH=58+tableH([128,200,CW-328],orows);
+  var drawOverview=()=>{need(overH);section('','Deine Testergebnisse im Überblick');table([128,200,CW-328],['Test','Beobachtung','Ergebnis im Modell'],orows);};
+  // Höhe der Ziel-Setup-Seite, damit die Übersicht notfalls dort als Zusammenfassung Platz findet
+  const setupH=r.setup?50+textH('x',{s:9.5})+4+18+textH(r.setup.text,{s:10.5})+8+(r.miss?textH(r.miss.text,{s:10.5,f:'b'})+8:0)+textH(r.setup.intro,{s:9.5,w:CW-30})+38+tableH([140,CW-140],r.setup.rows):0;
+  var overviewLater=false;
+  if(y-overH>=BOTTOM)drawOverview();          // passt noch auf die laufende Seite
+  else if(r.setup&&setupH+overH+10<=PAGE_USABLE)overviewLater=true; // sonst als Zusammenfassung auf die Setup-Seite
+  else drawOverview();
+  // Kraftquelle und Griff gehören zusammen: Platz vorab berechnen, Bild füllt den Rest
+  const PSUB='Woher du im Schwung vor allem deine Kraft holst. Gedreht wird bei jedem Typ, entscheidend ist die Hauptquelle.';
+  const PTXT=r.power?.text||'Ohne mindestens drei eindeutige Testergebnisse legen wir keine Kraftquelle fest.';
+  const PLEG='Glide: Kraft vor allem aus der seitlichen Bewegung des Beckens zum Ziel · Spin: aus der Rotation um eine mittige Achse · Launch: aus dem Druck in den Boden und dem Strecken der Beine. Ergebnis aus der Mehrheit deiner fünf Tests.';
+  const GSUB='Hintere Hand aus dem Arm-Pendeltest, vordere Hand aus dem Hip-Speed-Test.';
+  const gk0=r.gripPicture&&img[r.gripPicture]?r.gripPicture:null,gtw=gk0?CW-140:CW;
+  const gcap0=gk0?PICTURES[gk0].caption+(PICTURES[gk0].crop&&r.side==='Links'?' Spiegelbild für Linksspieler.':''):'';
+  const griffH=50+textH(GSUB,{s:9.5})+4+Math.max(gk0?imageH(gk0,120,115)+textH(gcap0,{s:8,w:120,lh:1.35})+11:0,textH(r.model.grip,{s:10.5,f:'b',w:gtw})+textH(r.model.hipDetail,{s:10.5,w:gtw})+12)+8;
+  const kraftFix=50+textH(PSUB,{s:9.5})+4+18+textH(PTXT,{s:10.5,f:'b'})+6+textH(r.model.postDetail,{s:10.5})+10+textH(powerTypeLine(r.power),{s:10.5,f:'b'})+8+60+textH(PLEG,{s:9.5})+14;
+  let pth=0;
+  if(img.powertypes){
+   const imgExtra=16+10;
+   if(y-(kraftFix+griffH+110+imgExtra)<BOTTOM)newPage();
+   pth=Math.max(90,Math.min(170,y-BOTTOM-kraftFix-griffH-imgExtra));
+  }else need(kraftFix+griffH);
+  section(1,'Deine Kraftquelle','Woher du im Schwung vor allem deine Kraft holst. Gedreht wird bei jedem Typ, entscheidend ist die Hauptquelle.');
+  spaced((r.power?.name||'OFFEN').toUpperCase(),M,y-8,{s:7.5,color:C.green2});y-=18;
+  para(r.power?.text||'Ohne mindestens drei eindeutige Testergebnisse legen wir keine Kraftquelle fest.',{s:10.5,f:'b',gap:6});
+  para(r.model.postDetail,{s:10.5,color:C.muted,gap:10});
+  if(img.powertypes){const hl=({glide:0,spin:1,launch:2})[r.power?.key]??null;y-=image('powertypes',M,y,CW,pth,{highlight:hl})+10;}
+  para(powerTypeLine(r.power),{f:'b',s:10.5,color:C.green,gap:8});
+  need(60);y-=triple(POWER,r.power?.key,M,y,CW,46)+14;
+  para('Glide: Kraft vor allem aus der seitlichen Bewegung des Beckens zum Ziel · Spin: aus der Rotation um eine mittige Achse · Launch: aus dem Druck in den Boden und dem Strecken der Beine. Ergebnis aus der Mehrheit deiner fünf Tests.',{s:9.5,color:C.muted,gap:14});
+
+  // ================= 2 · Griff =================
+  {
+  const gk=r.gripPicture&&img[r.gripPicture]?r.gripPicture:null,imgW=120,gap=20,tw2=gk?CW-imgW-gap:CW;
+  const cap=gk?PICTURES[gk].caption+(PICTURES[gk].crop&&r.side==='Links'?' Spiegelbild für Linksspieler.':''):'';
+  const picH=gk?imageH(gk,imgW,115)+textH(cap,{s:8,w:imgW,lh:1.35})+11:0;
+  const txtH=textH(r.model.grip,{s:10.5,f:'b',w:tw2})+textH(r.model.hipDetail,{s:10.5,w:tw2})+12;
+  need(textH('x',{s:9.5})+56+Math.max(picH,txtH)+8);// Abschnittskopf + Inhalt, alles auf einer Seite
+  section(2,'Dein Griff','Hintere Hand aus dem Arm-Pendeltest, vordere Hand aus dem Hip-Speed-Test.');
+  const top1=y;let ty=y;
   const put=(t,o)=>{const h=textH(t,{...o,w:tw2});textAt(t,M,ty,{...o,w:tw2});ty-=h+(o.gap??6);};
-  spaced((r.power?.name||'OFFEN').toUpperCase(),M,ty-8,{s:7.5,color:C.green2});ty-=16;
-  put(r.power?.text||(r.model.conflict?'Hand- und Dynamiktest passen noch nicht zusammen.':'Ohne eindeutige Testergebnisse wählen wir keinen Bewegungstyp.'),{s:11,f:'b'});
-  put(r.model.grip,{s:10.5});
-  put(r.model.bodydetail,{s:10.5,color:C.muted});
+  put(r.model.grip,{s:10.5,f:'b'});
+  put(r.model.hipDetail,{s:10.5,color:C.muted});
   let ih=0;
-  if(bodyKey&&img[bodyKey]){ih=image(bodyKey,M+tw2+gap,top1,imgW,200);const cap=PICTURES[bodyKey].caption+(PICTURES[bodyKey].crop&&r.side==='Links'?' Spiegelbild für Linksspieler.':'');ih+=textAt(cap,M+tw2+gap,top1-ih-5,{s:7.3,color:C.muted,w:imgW,lh:1.35})+6;}
+  if(gk){ih=image(gk,M+tw2+gap,top1,imgW,115);ih+=textAt(cap,M+tw2+gap,top1-ih-5,{s:8,color:C.muted,w:imgW,lh:1.35})+6;}
   y=Math.min(ty,top1-ih)-8;
-  need(70);
-  spaced('DEIN BEWEGUNGSTYP IM MODELL',M,y-8,{s:7.5,color:C.green2});y-=18;
-  y-=triple(POWER,r.power?.key,M,y,CW,46)+14;
-  para('Glide: Becken bewegt sich zum Ziel, Oberkörper bleibt zurück · Spin: drehende Körperbewegung · Launch: Druck in den Boden und Aufrichten. Zuordnung nach der Mehrheit aus Armtest, Post-Test, Hip-Speed-Test, Spannweite und Armmaßen; keine Messung von Bodenkräften.',{s:8.3,color:C.muted,gap:14});
-  section('','Deine Testergebnisse im Überblick');
-  table([128,200,CW-328],['Test','Beobachtung','Ergebnis im Modell'],testOverview(r).map(o=>[o.test,o.seen,o.result]));
+  }
  }
 
  // ================= 2 + 3 · Rückschwung / Abschwung =================
  if(!r.model.restricted){
-  newPage();
-  section('2 · 3','Rückschwung und Abschwung','Weg der Arme und Höhe am obersten Punkt, getrennt von der Abschwungzone.');
+  newPage();// Bilder, Kacheln und Erklärung bleiben zusammen auf einer Seite
+  section('3 · 4','Rückschwung und Abschwung','Weg der Arme und Höhe am obersten Punkt, getrennt von der Abschwungzone.');
   const gap=22,cw=(CW-gap)/2,top0=y;
   const col=(x,head,tag,body,sub,imgKey,hl,caption)=>{
    let ty=top0;
-   page.drawText(clean(head),{x,y:ty-13,size:13.5,font:F.b,color:hex(C.ink)});ty-=26;
-   spaced(clean(tag).toUpperCase(),x,ty-8,{s:7.3,color:C.green2});ty-=17;
-   ty-=textAt(body,x,ty,{s:10,w:cw})+6;
-   if(sub)ty-=textAt(sub,x,ty,{s:10,w:cw,color:C.muted})+6;
-   if(imgKey&&img[imgKey]){const h=image(imgKey,x,ty,cw,120,{highlight:hl});ty-=h+4;ty-=textAt(caption,x,ty,{s:7.5,color:C.muted,w:cw,lh:1.35})+8;}
+   page.drawText(clean(head),{x,y:ty-13,size:12.5,font:F.b,color:hex(C.ink)});ty-=26;
+   spaced(clean(tag).toUpperCase(),x,ty-8,{s:7.5,color:C.green2});ty-=17;
+   ty-=textAt(body,x,ty,{s:10.5,w:cw})+6;
+   if(sub)ty-=textAt(sub,x,ty,{s:10.5,w:cw,color:C.muted})+6;
+   if(imgKey&&img[imgKey]){const h=image(imgKey,x,ty,cw,120,{highlight:hl});ty-=h+4;ty-=textAt(caption,x,ty,{s:8,color:C.muted,w:cw,lh:1.35})+8;}
    return ty;
   };
   const ypos=[];
   ypos.push(col(M,'Rückschwungführung',r.model.armback?.name||'Noch offen',r.model.backExplanation||'',r.back?r.back.name+'. '+r.back.text:'Die benötigten Körpermaße fehlen.','track',({low:0,mid:1,high:2})[r.back?.plane]??null,PICTURES.track.caption));
   ypos.push(col(M+cw+gap,'Abschwungzone',r.down?.name||'Noch offen',r.down?.text||'Die benötigten Armmaße fehlen.','',r.down?.plane,null,r.down?.plane?PICTURES[r.down.plane].caption:''));
   y=Math.min(...ypos)-8;
-  need(150);
-  spaced('OBERSTER PUNKT',M,y-8,{s:7.3,color:C.green2});spaced('ABSCHWUNGZONE',M+cw+gap,y-8,{s:7.3,color:C.green2});y-=18;
+  // kein Umbruch: Kacheln bleiben bei den Bildern
+  spaced('OBERSTER PUNKT',M,y-8,{s:7.5,color:C.green2});spaced('ABSCHWUNGZONE',M+cw+gap,y-8,{s:7.5,color:C.green2});y-=18;
   const g=triple(TOPS,r.back?.plane,M,y,cw,46);triple(DOWNS,r.down?.plane,M+cw+gap,y,cw,46);y-=g+14;
   callout('Weg und Endposition sind zwei verschiedene Punkte: Der Armtest beschreibt, wie die Arme nach oben geführt werden. Die Spannweite sagt, wie hoch der vordere Arm am obersten Punkt stehen darf. Die Abschwungzone ergibt sich getrennt aus deinen Armmaßen.',{label:'WICHTIG ZUM VERSTÄNDNIS',s:9.5});
  }
 
+ // ================= Ziel-Setup =================
+ if(!r.model.restricted){
+  if(r.setup){
+   newPage();// Ziel-Setup auf eigener Seite
+   section('','Dein Ziel-Setup nach Hüfttyp','Orientierung passend zu deinem Hip-Speed-Test.');
+   spaced(r.setup.name.toUpperCase(),M,y-8,{s:7.5,color:C.green2});y-=18;
+   para(r.setup.text,{s:10.5,gap:8});
+   if(r.miss)para(r.miss.text,{f:'b',s:10.5,color:C.green,gap:8});
+   callout(r.setup.intro,{label:'SO GEHST DU VOR',s:9.5});
+   table([140,CW-140],['Merkmal','Empfehlung'],r.setup.rows);
+   if(r.setup.note)para(r.setup.note,{s:9.5,color:C.muted,gap:10});
+   if(overviewLater){y-=10;drawOverview();}
+  }
+ }
+
  // ================= Übungen =================
  if(r.model.status!=='paused'){
-  newPage();
+  if(r.setup)newPage();else need(260);
   section('', 'Deine Übungen','Immer langsam und ohne Druck. Bei Schmerzen sofort beenden.');
   const drillCard=(d,compact)=>{
-   const w=CW-28,steps=d.steps.map(s=>wrap(s,'r',9.8,w-18));
-   const h=24+textH(d.goal,{f:'i',s:9.8,w})+steps.reduce((a,l)=>a+l.length*9.8*1.38+3,0)+(d.watch?textH(d.watch,{s:9,w:w-16})+16:0)+(d.reps?16:0)+22;
+   const w=CW-28,steps=d.steps.map(s=>wrap(s,'r',9.5,w-18));
+   const h=24+textH(d.goal,{f:'i',s:9.5,w})+steps.reduce((a,l)=>a+l.length*9.5*1.38+3,0)+(d.watch?textH(d.watch,{s:9.5,w:w-16})+16:0)+(d.reps?16:0)+22;
    need(h+10);
    rrect(M,y,CW,h,12,{fill:C.white,stroke:C.line,sw:1});
    rrect(M+1,y-10,3.5,h-20,1.75,{fill:compact?C.faint:C.green2});
    const top=y;let ty=y-14;
-   page.drawText(clean(d.title),{x:M+16,y:ty-9,size:12,font:F.b,color:hex(C.ink)});
-   const mm=d.minutes+' Min.';rrect(W-M-14-width(mm,'b',8.5)-14,ty+1,width(mm,'b',8.5)+14,15,7.5,{fill:C.mint});page.drawText(mm,{x:W-M-14-width(mm,'b',8.5)-7,y:ty-9,size:8.5,font:F.b,color:hex(C.green)});
+   page.drawText(clean(d.title),{x:M+16,y:ty-9,size:11,font:F.b,color:hex(C.ink)});
+   const mm=d.minutes+' Min.';rrect(W-M-14-width(mm,'b',8)-14,ty+1,width(mm,'b',8)+14,15,7.5,{fill:C.mint});page.drawText(mm,{x:W-M-14-width(mm,'b',8)-7,y:ty-9,size:8,font:F.b,color:hex(C.green)});
    ty-=22;
-   ty-=textAt(d.goal,M+16,ty,{f:'i',s:9.8,color:C.muted,w})+4;
-   steps.forEach((ls,i)=>{page.drawText(String(i+1)+'.',{x:M+16,y:ty-9.8*0.92,size:9.8,font:F.b,color:hex(C.green2)});ls.forEach((ln,j)=>{page.drawText(ln,{x:M+32,y:ty-9.8*0.92-j*9.8*1.38,size:9.8,font:F.r,color:hex(C.ink)});});ty-=ls.length*9.8*1.38+3;});
-   if(d.watch){const wh=textH(d.watch,{s:9,w:w-16})+10;rrect(M+16,ty-2,w,wh,7,{fill:C.goldbg});textAt('Achte darauf: '+d.watch,M+24,ty-7,{s:9,w:w-16,color:'#5c4510'});ty-=wh+6;}
-   if(d.reps){page.drawText(clean('Umfang: '+d.reps),{x:M+16,y:ty-9,size:8.5,font:F.b,color:hex(C.muted)});}
+   ty-=textAt(d.goal,M+16,ty,{f:'i',s:9.5,color:C.muted,w})+4;
+   steps.forEach((ls,i)=>{page.drawText(String(i+1)+'.',{x:M+16,y:ty-9.5*0.92,size:9.5,font:F.b,color:hex(C.green2)});ls.forEach((ln,j)=>{page.drawText(ln,{x:M+32,y:ty-9.5*0.92-j*9.5*1.38,size:9.5,font:F.r,color:hex(C.ink)});});ty-=ls.length*9.5*1.38+3;});
+   if(d.watch){const wh=textH(d.watch,{s:9.5,w:w-16})+10;rrect(M+16,ty-2,w,wh,7,{fill:C.goldbg});textAt('Achte darauf: '+d.watch,M+24,ty-7,{s:9.5,w:w-16,color:'#5c4510'});ty-=wh+6;}
+   if(d.reps){page.drawText(clean('Umfang: '+d.reps),{x:M+16,y:ty-9,size:8,font:F.b,color:hex(C.muted)});}
    y=top-h-10;
   };
-  const label=t=>{need(40);y-=4;spaced(t.toUpperCase(),M,y-8,{s:7.5,color:C.green2});y-=20;};
+  const label=t=>{need(150);y-=4;spaced(t.toUpperCase(),M,y-8,{s:7.5,color:C.green2});y-=20;};
   if(r.drills.main){label('Deine Hauptübung · '+r.model.focusName);drillCard(r.drills.main,false);}
   label('Vor jeder Einheit');(r.drills.basis||[]).forEach(d=>drillCard(d,true));
   if((r.drills.optional||[]).length){label('Optional, wenn du mehr Zeit hast');r.drills.optional.forEach(d=>drillCard(d,true));}
@@ -351,39 +399,42 @@ async function createReportPDF(r,opts={}){
 
  // ================= Angebot =================
  {
-  const o=r.offer;y-=8;need(320);
-  const top=y,hh=302;
+  const o=r.offer;y-=8;
+  const noteW=CW-48-22,noteH=textH(o.bookingNote,{s:9.5,w:noteW,f:'b'})+20;
+  const hh=302+noteH+12;need(hh+18);
+  const top=y;
   rrect(M,top,CW,hh,18,{fill:C.green});rrect(M,top,CW,6,3,{fill:C.gold});
   spaced('DEIN NÄCHSTER SCHRITT',M+24,top-32,{s:7.5,color:C.lightgreen,sp:1.5});
   page.drawText(clean(o.name),{x:M+24,y:top-62,size:24,font:F.b,color:hex(C.white)});
-  page.drawText(clean(o.count+' Termine à '+o.minutes+' Minuten'),{x:M+24,y:top-82,size:11.5,font:F.r,color:hex(C.mint2)});
+  page.drawText(clean(o.count+' Termine à '+o.minutes+' Minuten'),{x:M+24,y:top-82,size:10.5,font:F.r,color:hex(C.mint2)});
   const pw=width(o.priceText,'b',32);
   spaced(o.priceLabel.toUpperCase(),W-M-24-Math.max(pw,spacedW(o.priceLabel.toUpperCase(),'b',7.5,1.5)),top-32,{s:7.5,color:C.gold,sp:1.5});
   page.drawText(clean(o.priceText),{x:W-M-24-pw,y:top-68,size:32,font:F.b,color:hex(C.white)});
   const gap=10,cwid=(CW-48-gap*2)/3,tw2=cwid-24;
   o.sessions.forEach((se,i)=>{
-   const x=M+24+i*(cwid+gap),ty0=top-104,bh=hh-104-56;
+   const x=M+24+i*(cwid+gap),ty0=top-104,bh=142;
    rrect(x,ty0,cwid,bh,12,{fill:C.green2});
-   spaced('TERMIN '+se.n,x+12,ty0-20,{s:7,color:C.lightgreen,sp:1.2});
-   let ty=ty0-30;wrap(se.title,'b',11.5,tw2).forEach(ln=>{page.drawText(ln,{x:x+12,y:ty-11,size:11.5,font:F.b,color:hex(C.white)});ty-=14;});ty-=4;
-   textAt(se.text,x+12,ty,{s:8.6,w:tw2,lh:1.4,color:C.mint2});
+   spaced('TERMIN '+se.n,x+12,ty0-20,{s:7.5,color:C.lightgreen,sp:1.2});
+   let ty=ty0-30;wrap(se.title,'b',11,tw2).forEach(ln=>{page.drawText(ln,{x:x+12,y:ty-11,size:11,font:F.b,color:hex(C.white)});ty-=14;});ty-=4;
+   textAt(se.text,x+12,ty,{s:9.5,w:tw2,lh:1.4,color:C.mint2});
   });
-  textAt('Interesse? Ruf an oder schreib mir per WhatsApp: '+CONTACT.phone+'  ·  '+CONTACT.web,M+24,top-hh+40,{s:10,color:C.white,w:CW-48,f:'b'});
+  {const ny=top-104-142-14;rrect(M+24,ny,CW-48,noteH,10,{fill:C.goldbg});textAt(o.bookingNote,M+35,ny-10,{s:9.5,w:noteW,f:'b',color:C.ink});}
+  textAt('Interesse? Ruf an oder schreib mir per WhatsApp: '+CONTACT.phone+'  ·  '+CONTACT.web,M+24,top-hh+40,{s:10.5,color:C.white,w:CW-48,f:'b'});
   y-=hh+16;
  }
 
  // ================= Notizen + Hinweise =================
- need(250);
+ {const cw=CW-30;need(50+6*24+14+46+textH(DISCLAIMER,{s:9.5,w:cw})+24+14+10+(Object.keys(img).length?textH(CREDITS,{s:8}):0));}
  section('', 'Notizen');
  for(let i=0;i<6;i++){need(24);line(M,y-18,W-M,y-18,'#cfd6cc',0.7);y-=24;}
  y-=14;
  need(50);
- page.drawText(clean(CONTACT.name),{x:M,y:y-12,size:12,font:F.b,color:hex(C.green)});
- page.drawText(clean(CONTACT_LINE),{x:M,y:y-27,size:10,font:F.r,color:hex(C.muted)});
+ page.drawText(clean(CONTACT.name),{x:M,y:y-12,size:12.5,font:F.b,color:hex(C.green)});
+ page.drawText(clean(CONTACT_LINE),{x:M,y:y-27,size:10.5,font:F.r,color:hex(C.muted)});
  y-=46;
  // Hinweis für Kunden und Bildnachweis
- callout(DISCLAIMER,{fill:C.goldbg,bar:C.gold,label:'WICHTIGER HINWEIS',s:9.2});
- if(Object.keys(img).length)para(CREDITS,{s:7.6,color:C.faint,gap:0});
+ callout(DISCLAIMER,{fill:C.goldbg,bar:C.gold,label:'WICHTIGER HINWEIS',s:9.5});
+ if(Object.keys(img).length)para(CREDITS,{s:8,color:C.faint,gap:0});
 
  // ================= Kopf- und Fußzeilen =================
  const n=pages.length;
@@ -391,12 +442,12 @@ async function createReportPDF(r,opts={}){
   page=pg;
   if(i>0){
    spaced('SCHWUNG-DNA',M,H-40,{s:7.5,color:C.green2,sp:1.5});
-   let nm=clean(r.name);while(nm.length>8&&width(nm+'  ·  '+fmtD(r.date),'r',8.5)>300)nm=nm.slice(0,-2);const right=clean((nm===clean(r.name)?nm:nm.trim()+'…')+'  ·  '+fmtD(r.date));pg.drawText(right,{x:W-M-width(right,'r',8.5),y:H-40,size:8.5,font:F.r,color:hex(C.muted)});
+   let nm=clean(r.name);while(nm.length>8&&width(nm+'  ·  '+fmtD(r.date),'r',8)>300)nm=nm.slice(0,-2);const right=clean((nm===clean(r.name)?nm:nm.trim()+'…')+'  ·  '+fmtD(r.date));pg.drawText(right,{x:W-M-width(right,'r',8),y:H-40,size:8,font:F.r,color:hex(C.muted)});
    line(M,H-48,W-M,H-48,C.line,0.7);
   }
   line(M,44,W-M,44,C.line,0.7);
-  pg.drawText(clean(CONTACT.name+' · '+CONTACT.phone+' · '+CONTACT.web),{x:M,y:30,size:7.8,font:F.r,color:hex(C.faint)});
-  const pn='Seite '+(i+1)+' / '+n;pg.drawText(pn,{x:W-M-width(pn,'r',7.8),y:30,size:7.8,font:F.r,color:hex(C.faint)});
+  pg.drawText(clean(CONTACT.name+' · '+CONTACT.phone+' · '+CONTACT.web),{x:M,y:30,size:8,font:F.r,color:hex(C.faint)});
+  const pn='Seite '+(i+1)+' / '+n;pg.drawText(pn,{x:W-M-width(pn,'r',8),y:30,size:8,font:F.r,color:hex(C.faint)});
  });
  return await doc.save();
 }

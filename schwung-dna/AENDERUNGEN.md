@@ -59,3 +59,20 @@ Geänderte Dateien (in den Ordner `schwung-dna` des Repositorys hochladen und ü
 - GitHub Pages abschalten und Repository auf „Private“ stellen.
 - Nutzungsrecht für die New-Horizons- und HackMotion-Bilder klären oder eigene Bilder einsetzen. Der Bildnachweis ersetzt keine Erlaubnis.
 - Alte Dateien im Ordner löschen: `app.js`, `pdf.js`, `rules.js` (Hauptebene von `schwung-dna`) und `ANLEITUNG.txt` (Kopie der README).
+
+## Version 2.8 · Setup nach Hüfttyp
+
+- Neuer Block „Dein Setup nach Hüfttyp“ (Slow, Mid, Fast) mit Griff, V obere und hintere Hand, Ballposition, Abstand und Fußstellung, im Hip-Speed-Schritt, in der Berichtsansicht und im PDF (Seite 5).
+- Für Linksspieler gespiegelt, bei uneindeutigem Ergebnis oder Beschwerden ausgeblendet.
+- Cache auf schwung-dna-v2-8 erhöht.
+- Berufsbezeichnung auf „Master Golf Professional“ geändert (Deckblatt, Fußzeile, Kontakt, App-Kopf). Cache auf schwung-dna-v2-9.
+- Bild der drei Bewegungstypen (Glider, Spinner, Launcher, Quelle GOLF.com) auf Seite 4 und in der Berichtsansicht, eigener Typ markiert. Cache auf schwung-dna-v2-10.
+- Unter dem Bewegungstypen-Bild steht der eigene Typ in gut lesbarer Schrift; die Kacheln Glide/Spin/Launch sind wieder da. Cache auf schwung-dna-v2-11.
+- Texte ohne Annahme eines Folgetermins („So geht es für dich weiter“, Aufgabe zum Ausprobieren); Angebot als Option formuliert. Feste Seitenumbrüche vor Abschnitt 1, 2·3 und Übungen entfernt, damit keine halbleeren Seiten entstehen. Bildhinweis GOLF.com entfernt. Cache auf schwung-dna-v2-12.
+- Neuer Ablauf: Profil, Maße, Arm-Pendeltest, Post, Hip-Speed, Video (gewohnter Schwung), Schlagvergleich. Video vor dem Ball: „weicht ab“ schließt den Punkt als Vergleichspunkt aus, „teilweise“ senkt die Priorität. Ansage-Kästen „Sag dem Kunden“ in jedem Testschritt. Ziel-Setup als Orientierung mit Reihenfolge, bei Griffkonflikt ohne Knöchelwerte, im PDF hinter Rückschwung/Abschwung. Griff-Übernahme nur bei Folge-Checks. Warnung, wenn das Ergebnis den Trefferzahlen widerspricht. Cache auf schwung-dna-v2-13.
+- Beschwerden als Ja/Nein-Frage (Schmerzen bei Drehbewegungen). Ziel entfernt. Häufigster Fehlschlag wird mit dem Hüfttyp abgeglichen (Hip-Schritt, Video-Hinweis, Seite 1, Ziel-Setup). Cache auf schwung-dna-v2-14.
+- Abschnitt „Bewegungsansatz und Griff“ geteilt in 1 „Deine Kraftquelle“ (mit Bild der drei Typen) und 2 „Dein Griff“ (mit Griff-Foto); Rückschwung/Abschwung jetzt 3 · 4. Typen beschreiben die Hauptkraftquelle statt „drehende Bewegung“. Cache auf schwung-dna-v2-15.
+- Testübersicht im PDF vor die Kraftquelle gezogen; Ziel-Setup in der App hinter Rückschwung/Abschwung wie im PDF; Mischform heißt „Mehrere Kraftquellen“.
+- Einheitliche Schriftgrößen im PDF (17 / 12,5 / 11 / 10,5 / 9,5 / 8 / 7,5). Punkt 3 der Aufgabe und die 5+5-Übung verständlicher (Reihenfolge tauschen an einem anderen Tag). „Foto: HackMotion“ aus den Bildunterschriften entfernt. Rückschwung/Abschwung mit Bildern, Kacheln und Erklärung immer auf einer Seite; Ziel-Setup auf eigener Seite; Griff-Abschnitt wird nie getrennt. Cache auf schwung-dna-v2-16.
+- Festigungs-Paket: Sonderpreis „bei Buchung bis …“ und Hinweis, dass die Termine auch im Folgejahr stattfinden können; nur das Buchungsdatum zählt. Cache auf schwung-dna-v2-17.
+- Fehlerprüfung v2.17: Tabellen (Videoabgleich, Testübersicht) werden nicht mehr über zwei Seiten getrennt; Kraftquelle und Griff bleiben zusammen, das Bild passt sich dem Platz an; passt die Testübersicht nicht mehr auf Seite 3, steht sie als Zusammenfassung unter dem Ziel-Setup; Notizen, Kontakt und „Wichtiger Hinweis“ bleiben zusammen (keine Seite nur mit dem Hinweis); Warnung am Ball nur noch bei echtem Widerspruch (besser gegen weniger Treffer oder umgekehrt); „Mischform“ heißt einheitlich „mehrere Kraftquellen“. Cache auf schwung-dna-v2-18.

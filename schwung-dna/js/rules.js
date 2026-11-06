@@ -17,9 +17,9 @@ const joinDe=a=>a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' und '+a[a.lengt
 const lcFirst=s=>s?s[0].toLowerCase()+s.slice(1):s;
 
 const POWER_TYPES={
- glide:{key:'glide',name:'Seitliches Bewegen · Glide',short:'Glide (seitlich)',adj:'eine seitliche Bewegung zum Ziel',feel:'eine kleine Bewegung des Beckens zum Ziel, während Kopf und Oberkörper hinter dem Ball bleiben'},
- spin:{key:'spin',name:'Drehen · Spin',short:'Spin (drehend)',adj:'eine drehende Bewegung',feel:'eine ruhige Drehung zum Ziel ohne zusätzliche Seitverschiebung'},
- launch:{key:'launch',name:'Drücken und Aufrichten · Launch',short:'Launch (vertikal)',adj:'Druck in den Boden und Aufrichten',feel:'Druck in den Boden und ein natürliches Aufrichten im Durchschwung'}
+ glide:{key:'glide',name:'Seitliche Kraft · Glide',short:'Glide (seitlich)',adj:'du deine Kraft vor allem aus der seitlichen Bewegung zum Ziel holst',feel:'eine kleine Bewegung des Beckens zum Ziel, während Kopf und Oberkörper hinter dem Ball bleiben'},
+ spin:{key:'spin',name:'Rotationskraft · Spin',short:'Spin (Rotation)',adj:'du deine Kraft vor allem aus der Rotation holst',feel:'eine ruhige Drehung zum Ziel ohne zusätzliche Seitverschiebung'},
+ launch:{key:'launch',name:'Vertikale Kraft · Launch',short:'Launch (vertikal)',adj:'du deine Kraft vor allem aus dem Druck in den Boden und dem Aufrichten holst',feel:'Druck in den Boden und ein natürliches Aufrichten im Durchschwung'}
 };
 // Punktesystem nach Adams/Najar
 const FOLD_POWER={'Side/Under':'glide','Side On':'spin','On Top':'launch'};
@@ -36,7 +36,7 @@ const LEAD_FROM_HIP={Slow:'Schwächer',Mid:'Neutral',Fast:'Stärker'};
 const GRIP_DIR={Schwächer:-1,Neutral:0,Stärker:1};
 const DIR_WORD={'-1':'schwächer','0':'neutral','1':'stärker'};
 
-function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,hip,trial,focus,pain}){
+function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,hip,trial,focus,pain,vid={}}){
  const valid=(...x)=>x.every(v=>Number.isFinite(v)&&v>0),evidence=[],gaps=[];
  const spanCmp=valid(height,span)?comparison(span-height):null,armCmp=valid(upper,fore)?comparison(fore-upper):null;
 
@@ -52,13 +52,13 @@ function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,h
   const [k1,p1]=sorted[0],p2=sorted[1][1];
   const pointText=sorted.map(([k,p])=>POWER_TYPES[k].short.split(' ')[0]+' '+p).join(' · ');
   if(p1===p2){
-   power={key:'mixed',name:'Kombinierter Bewegungsansatz',short:'Mischform',text:'Deine Tests verteilen sich auf mehrere Bewegungstypen ('+pointText+'). Wir legen deshalb noch keinen einzelnen Typ fest und prüfen die Bewegung im Termin am Ball.',feel:null,points};
+   power={key:'mixed',name:'Mehrere Kraftquellen',short:'Mischform',text:'Deine Tests verteilen sich auf mehrere Kraftquellen ('+pointText+'). Wir legen deshalb noch keinen einzelnen Typ fest. Die Bewegung lässt sich am besten am Ball prüfen.',feel:null,points};
   }else{
    powerMargin=p1-p2;
    const pro=[...new Set(votes.filter(v=>v.key===k1).map(v=>v.test))];
    const foldKey=FOLD_POWER[fold];
    const armNote=foldKey&&foldKey!==k1?' Dein Arm-Pendeltest allein deutet auf '+POWER_TYPES[foldKey].short+'; die Mehrheit der Tests entscheidet.':'';
-   power={...POWER_TYPES[k1],text:pro.length+' von '+testsUsed+' Tests sprechen für '+POWER_TYPES[k1].adj+' ('+joinDe(pro)+').'+armNote,points};
+   power={...POWER_TYPES[k1],text:pro.length+' von '+testsUsed+' Tests sprechen dafür, dass '+POWER_TYPES[k1].adj+' ('+joinDe(pro)+').'+armNote,points};
    evidence.push({rule:'five-test-power-points',source:'fivetests',status:'hypothesis'});
   }
  }else gaps.push('Für den Bewegungstyp fehlen Tests (mindestens drei nötig)');
@@ -75,7 +75,7 @@ function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,h
  const leadText=leadgrip?'Vordere Hand: '+({Schwächer:'schwächerer',Neutral:'neutraler',Stärker:'stärkerer'}[leadgrip])+' Griffansatz, im Schlagvergleich bestätigt.'
   :({Slow:'Für die vordere Hand prüfen wir einen schwächeren Griffansatz am Ball.',Mid:'Für die vordere Hand prüfen wir einen neutralen Griffansatz am Ball.',Fast:'Für die vordere Hand prüfen wir einen stärkeren Griffansatz am Ball.'}[hip]||'Die vordere Hand ist noch offen.');
  const grip=gripConflict
-  ?handMatch.text+' Dein Hip-Speed-Test spricht dagegen für einen '+DIR_WORD[leadDir]+'en Griff der vorderen Hand. Beide Hände in entgegengesetzte Richtungen zu verändern, empfehlen wir nicht. Deinen Griff prüfen wir deshalb im Termin am Ballflug.'
+  ?handMatch.text+' Dein Hip-Speed-Test spricht dagegen für einen '+DIR_WORD[leadDir]+'en Griff der vorderen Hand. Beide Hände in entgegengesetzte Richtungen zu verändern, empfehlen wir nicht. Deinen Griff solltest du deshalb am Ballflug prüfen.'
   :[handMatch?.text,leadText].filter(Boolean).join(' ');
  if(['Slow','Mid','Fast'].includes(hip))evidence.push({rule:'hip-speed-to-lead-grip',source:'hip',status:'hypothesis'});
  if(handMatch)evidence.push({rule:'arm-fold-to-trail-grip',source:'armtest',status:'hypothesis'});else gaps.push('Hand-/Armtest noch nicht eindeutig');
@@ -84,6 +84,7 @@ function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,h
  const hipText={Slow:'Die Hüfte bleibt im Treffmoment relativ zum Rumpf zurück. Die Schlagfläche kann dadurch früher schließen.',Mid:'Hüfte und Rumpf arbeiten im Treffmoment gemeinsam.',Fast:'Die Hüfte ist dem Rumpf im Treffmoment voraus. Die Schlagfläche kann dadurch länger offen bleiben.'}[hip]||'Die Hüft-Abstimmung ist noch offen.';
  const pressureText={front:'Im Rückschwung spürst du mehr Druck unter dem vorderen Fuß.',center:'Im Rückschwung spürst du den Druck ähnlich unter beiden Füßen.',rear:'Im Rückschwung spürst du mehr Druck unter dem hinteren Fuß.'}[pressure]||'';
  const bodydetail=postText+' '+hipText+(pressureText?' '+pressureText:'');
+ const postDetail=postText+(pressureText?' '+pressureText:''),hipDetail=hipText;
 
  // ---------- Ebenen aus den Körpermaßen ----------
  let back=null,down=null;
@@ -134,8 +135,12 @@ function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,h
   back:armback&&back?.plane?pathAction+' '+topAction+' Bewege dich langsam; erzwinge keine Endposition.':null,
   down:downAction
  };
+ // Videoabgleich: "weicht ab" schließt den Punkt als Vergleichspunkt aus, "teilweise" senkt die Klarheit um einen Punkt.
+ // Hüfte im Video betrifft den Griffansatz der vorderen Hand (abgeleitet aus dem Hüfttempo).
+ const VID_KEY={grip:vid.hip,back:vid.back,down:vid.down};
+ const videoOff=k=>VID_KEY[k]==='no',videoPart=k=>VID_KEY[k]==='part';
  const order=['motion','grip','back','down'];
- const ranking=order.map((k,i)=>({key:k,name:FOCUS_NAME[k],available:!!cues[k],score:cues[k]?clarity[k]:0,i})).sort((a,b)=>b.score-a.score||a.i-b.i);
+ const ranking=order.map((k,i)=>({key:k,name:FOCUS_NAME[k],available:!!cues[k]&&!videoOff(k),video:VID_KEY[k]||'',score:cues[k]&&!videoOff(k)?Math.max(0,clarity[k]-(videoPart(k)?1:0)):0,i})).sort((a,b)=>b.score-a.score||a.i-b.i);
  const automaticFocus=(ranking.find(x=>x.available&&x.score>0)||ranking.find(x=>x.available)||{}).key||null;
  const chosenFocus=order.includes(focus)?focus:automaticFocus;
  const focusName=FOCUS_NAME[chosenFocus]||'offener Test';
@@ -150,6 +155,7 @@ function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,h
   back:back?back.name+(armback?' · Führung: '+lcFirst(armback.name):''):'noch offen',
   down:down?down.name:'noch offen'
  };
+ Object.keys(findings).forEach(k=>{if(videoOff(k))findings[k]+=' · im Video nicht bestätigt';else if(videoPart(k))findings[k]+=' · im Video teilweise bestätigt';});
  const HIPWHY={Slow:'Dein Hip-Speed-Test zeigt: Die Hüfte bleibt relativ zum Rumpf zurück.',Mid:'Dein Hip-Speed-Test zeigt: Hüfte und Rumpf öffnen gemeinsam.',Fast:'Dein Hip-Speed-Test zeigt: Die Hüfte ist dem Rumpf voraus.'};
  const dSpan=valid(height,span)?span-height:null,dArm=valid(upper,fore)?fore-upper:null;
  const diffText=(d,a,b)=>Math.abs(d)<=MEASUREMENT_TOL_CM?a+' ist nahezu gleich wie '+b+' ('+(Math.abs(d)<1e-7?'gleich':f1(d)+' cm Unterschied')+').':a+' ist '+f1(d)+' cm '+(d>0?'länger':'kürzer')+' als '+b+'.';
@@ -167,35 +173,35 @@ function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,h
  if(status==='paused'){
   priority='Dein Hinweis: beschwerdefreie Bewegung klären.';
   planTitle='Bis zur Klärung keine neue Bewegungsübung';
-  steps=[{title:'Auslassen',text:'Die betroffene Bewegung auslassen.'},{title:'Nur Schmerzfreies',text:'Nur die im Termin ausdrücklich besprochene, schmerzfreie Bewegung ausführen.'}];
+  steps=[{title:'Auslassen',text:'Die betroffene Bewegung auslassen.'},{title:'Nur Schmerzfreies',text:'Nur die im Screening besprochene, schmerzfreie Bewegung ausführen.'}];
   criterion='Bei Schmerzen sofort beenden.';
-  next='Wir klären zuerst, welche Bewegungen du beschwerdefrei ausführen kannst.';
+  next='Kläre zuerst, am besten ärztlich oder physiotherapeutisch, welche Bewegungen du beschwerdefrei ausführen kannst. Erst danach lohnt sich eine Änderung am Schwung.';
  }else if(status==='open'){
   priority='Dein Hinweis: erst den Ausgangspunkt festhalten.';
   planTitle='Noch keine neue Bewegung festlegen';
   steps=[{title:'Gewohnt schlagen',text:'Mit Eisen 7 zehn lockere Bälle wie gewohnt schlagen.'},{title:'Zählen und notieren',text:'Saubere Treffer zählen und die häufigste Ballkurve notieren.'}];
-  criterion='Diese Werte sind die Grundlage für den nächsten Vergleich.';
-  next='Wir wiederholen die offenen Tests und wählen daraus einen einzelnen Vergleichspunkt.';
+  criterion='Diese Werte sind deine Grundlage für spätere Vergleiche.';
+  next='Einzelne Tests sind noch offen. Sobald sie wiederholt sind, lässt sich daraus ein einzelner Vergleichspunkt ableiten. Bis dahin spielst du wie gewohnt.';
  }else if(status==='rejected'){
   priority='Dein Ergebnis: Bei der gewohnten Bewegung bleiben.';
   planTitle='Den ungünstigen Ansatz vorerst weglassen';
   steps=[{title:'Gewohnt schlagen',text:'Mit Eisen 7 zehn lockere Bälle wie gewohnt schlagen.'},{title:'Zählen und notieren',text:'Trefferzahl und häufigste Ballkurve als Ausgangspunkt festhalten.'}];
   criterion='Die getestete Änderung wird vorerst nicht übernommen.';
-  next='Wir prüfen, weshalb der Vergleich für '+focusName+' ungünstiger war, und wählen einen anderen Ansatz.';
+  next='Bleib bei deiner gewohnten Bewegung. Wenn du später etwas anderes ausprobieren möchtest, eignet sich der nächste Punkt aus der Rangfolge der Befunde.';
  }else{
   priority=(status==='favorable'?'Dein Vergleichspunkt: ':'Dein erster Vergleichspunkt: ')+focusName+'.';
   planTitle=status==='favorable'?'So sicherst du den günstigen Kurzvergleich ab':'So prüfst du es';
   steps=[
    {title:'Ausprobieren',text:'Zuerst fünf langsame Probeschwünge ohne Ball. '+cue},
    {title:'Am Ball vergleichen',text:'Mit Eisen 7 und lockerem Tempo: fünf Bälle wie gewohnt, danach fünf Bälle mit dem Ansatz. Alles andere bleibt gleich.'},
-   {title:'Zählen und wiederholen',text:'Saubere Treffer eintragen. In einer zweiten Einheit alles noch einmal, diesmal mit umgekehrter Reihenfolge.'}
+   {title:'Zählen und wiederholen',text:'Trage die sauberen Treffer beider Durchgänge in die Tabelle unten ein. Wiederhole den Vergleich an einem anderen Tag, dann aber andersherum: zuerst fünf Bälle mit der Änderung, danach fünf Bälle wie gewohnt. So siehst du, ob wirklich die Änderung den Unterschied macht und nicht nur das Aufwärmen oder die Müdigkeit.'}
   ];
   decision={adopt:'In beiden Einheiten mehr saubere Treffer und ein mindestens ebenso angenehmes Gefühl: Du übernimmst den Ansatz.',keep:'Sonst spielst du wie gewohnt weiter. Der Ansatz wird dann nicht übernommen.'};
   criterion=decision.adopt+' '+decision.keep;
-  next='Bringe die Trefferzahlen beider Einheiten mit. Wir prüfen '+focusName+' am Ballflug und entscheiden, ob du den Ansatz beibehältst.';
+  next='Vergleiche den Ansatz für '+focusName+' in zwei Übungseinheiten und entscheide anhand deiner Trefferzahlen, ob du ihn übernimmst. Wenn du die Ergebnisse gemeinsam mit mir umsetzen und festigen möchtest, findest du am Ende des Berichts das passende Angebot.';
  }
  task=steps.map(x=>x.text).join(' ');
- const trialText={favorable:'Der Kurzvergleich für '+focusName+' war günstiger; wir überprüfen den Vorteil erneut.',rejected:'Der Kurzvergleich für '+focusName+' war ungünstiger.',compare:effectiveTrial==='same'?'Der Vergleich für '+focusName+' zeigte keinen klaren Vorteil.':effectiveTrial==='unclear'?'Der Vergleich für '+focusName+' war uneindeutig.':'Der Ansatz für '+focusName+' ist noch nicht am Ball bestätigt.',open:'Ein geeigneter Vergleichspunkt ist noch offen.',paused:'Die Bewegungsänderung ist zurückgestellt.'}[status];
+ const trialText={favorable:'Der Kurzvergleich für '+focusName+' war günstiger. Überprüfe den Vorteil in einer zweiten Übungseinheit.',rejected:'Der Kurzvergleich für '+focusName+' war ungünstiger.',compare:effectiveTrial==='same'?'Der Vergleich für '+focusName+' zeigte keinen klaren Vorteil.':effectiveTrial==='unclear'?'Der Vergleich für '+focusName+' war uneindeutig.':'Der Ansatz für '+focusName+' ist noch nicht am Ball bestätigt.',open:'Ein geeigneter Vergleichspunkt ist noch offen.',paused:'Die Bewegungsänderung ist zurückgestellt.'}[status];
 
- return {ranking:ranking.map(x=>({key:x.key,name:x.name,available:x.available,score:x.score,finding:findings[x.key]})),tieNote,focusWhy:focusWhyAll[chosenFocus]||'',decision,armback,leadCandidate,handGrip:handMatch?.text||'',gripConflict,compareCue,focusName,chosenFocus,backExplanation,priority,planTitle,steps,status,grip,bodydetail,trialText,conflict:power?.key==='mixed',screenComplete:checked.every(x=>x[1])&&!!back?.plane&&!!down?.plane,power,back,down,restricted,evidence,gaps,task,criterion,next};
+ return {ranking:ranking.map(x=>({key:x.key,name:x.name,available:x.available,score:x.score,finding:findings[x.key]})),tieNote,focusWhy:focusWhyAll[chosenFocus]||'',decision,armback,leadCandidate,handGrip:handMatch?.text||'',gripConflict,compareCue,focusName,chosenFocus,backExplanation,priority,planTitle,steps,status,grip,bodydetail,postDetail,hipDetail,trialText,conflict:power?.key==='mixed',screenComplete:checked.every(x=>x[1])&&!!back?.plane&&!!down?.plane,power,back,down,restricted,evidence,gaps,task,criterion,next};
 }
