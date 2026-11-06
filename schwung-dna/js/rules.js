@@ -124,7 +124,7 @@ function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,h
  const mag=(d,a,b)=>{const x=Math.abs(d);return x<=MEASUREMENT_TOL_CM?0:x<=a?1:x<=b?2:3;};
  const clarity={
   motion:power&&power.key!=='mixed'?Math.min(power.key==='spin'?1:3,powerMargin):0,
-  grip:gripConflict?0:(leadDir?2:0)+(leadDir&&leadDir===trailDir?1:0),
+  grip:gripConflict?0:(leadDir?1:0)+(leadDir&&leadDir===trailDir?1:0),
   back:valid(height,span)?mag(span-height,5,9):0,
   down:valid(upper,fore)?mag(fore-upper,3.5,5):0
  };
@@ -139,15 +139,23 @@ function evaluateScreening({height,span,upper,fore,fold,leadgrip,post,pressure,h
  // Hüfte im Video betrifft den Griffansatz der vorderen Hand (abgeleitet aus dem Hüfttempo).
  const VID_KEY={grip:vid.hip,back:vid.back,down:vid.down};
  const videoOff=k=>VID_KEY[k]==='no',videoPart=k=>VID_KEY[k]==='part';
+ // Feinwert bei Gleichstand: wie deutlich der Befund innerhalb seiner Stufe ist (0–1)
+ const band=(d,a,b)=>{const x=Math.abs(d),t=MEASUREMENT_TOL_CM;return x<=t?0:x<=a?(x-t)/(a-t):x<=b?(x-a)/(b-a):Math.min(1,(x-b)/b);};// Lage innerhalb der eigenen Stufe
+ const fine={
+  motion:power&&power.key!=='mixed'?(power.key==='spin'?0.2:Math.min(1,powerMargin/5)):0,// Spin ist der neutrale Typ: bei Gleichstand nachrangig
+  grip:leadDir?0.5:0,
+  back:valid(height,span)?band(span-height,5,9):0,
+  down:valid(upper,fore)?band(fore-upper,3.5,5):0
+ };
  const order=['motion','grip','back','down'];
- const ranking=order.map((k,i)=>({key:k,name:FOCUS_NAME[k],available:!!cues[k]&&!videoOff(k),video:VID_KEY[k]||'',score:cues[k]&&!videoOff(k)?Math.max(0,clarity[k]-(videoPart(k)?1:0)):0,i})).sort((a,b)=>b.score-a.score||a.i-b.i);
+ const ranking=order.map((k,i)=>({key:k,name:FOCUS_NAME[k],available:!!cues[k]&&!videoOff(k),video:VID_KEY[k]||'',score:cues[k]&&!videoOff(k)?Math.max(0,clarity[k]-(videoPart(k)?1:0)):0,i})).map(x=>({...x,fine:x.score?fine[x.key]:0})).sort((a,b)=>b.score-a.score||b.fine-a.fine||a.i-b.i);
  const automaticFocus=(ranking.find(x=>x.available&&x.score>0)||ranking.find(x=>x.available)||{}).key||null;
  const chosenFocus=order.includes(focus)?focus:automaticFocus;
  const focusName=FOCUS_NAME[chosenFocus]||'offener Test';
  const cue=cues[chosenFocus]||null;
  const top=ranking.filter(x=>x.available&&x.score>0);
  const tied=top.filter(x=>x.score===top[0]?.score).map(x=>x.name);
- const tieNote=!order.includes(focus)&&tied.length>1?'Gleich deutlich sind '+joinDe(tied)+'. Wir beginnen mit '+tied[0]+', weil wir in der Reihenfolge Körperbewegung, Griff, Rückschwung, Abschwung aufbauen.':'';
+ const tieNote=!order.includes(focus)&&tied.length>1?'Gleich deutlich sind '+joinDe(tied)+'. Wir beginnen mit '+tied[0]+', weil dieser Befund innerhalb seiner Stufe am deutlichsten ausfällt.':'';
  const handLabel=trailDir===null?null:DIR_WORD[trailDir];
  const findings={
   motion:power?power.name+(POSTN[post]?' · '+POSTN[post]:''):'noch offen',
